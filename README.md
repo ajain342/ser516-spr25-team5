@@ -1,4 +1,4 @@
 Team 5 
 Jeteish
-Akshat Jian
+Akshat Jain
 Srinivas Oguri
