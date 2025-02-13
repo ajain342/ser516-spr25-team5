@@ -1,14 +1,9 @@
-# test api(replace with acutal codeS)
 from flask import Flask, jsonify
 import random
 
 app = Flask(__name__)
 
-@app.route('/')
-def home():
-    return jsonify(message="Visit /loc to get a random number!")
-
-@app.route('/loc', methods=['GET'])
+@app.route('/random', methods=['GET'])
 def get_random_number():
     # Generate a random integer between 1 and 100
     number = random.randint(1, 100)
