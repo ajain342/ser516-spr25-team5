@@ -11,19 +11,11 @@ def get_github_repo():
     return args.repo_url
 
 def clone_repo(repo_url, temp_dir):
-    try:
-        subprocess.run(["git", "clone", repo_url, temp_dir], check=True)
-    except subprocess.CalledProcessError:
-        print("Failed to clone repository.")
-        exit(1)
+    subprocess.run(["git", "clone", repo_url, temp_dir], check=True)
 
 def run_cloc(temp_dir):
     output_file = os.path.join(temp_dir, "cloc_output.json")
-    try:
-        subprocess.run(["cloc", temp_dir, "--json", f"--out={output_file}"], check=True)
-    except subprocess.CalledProcessError:
-        print("Failed to run cloc.")
-        exit(1)
+    subprocess.run(["cloc", temp_dir, "--json", f"--out={output_file}"], check=True)
     return output_file
 
 def compute_modified_loc(json_file):
@@ -39,13 +31,30 @@ def compute_modified_loc(json_file):
     
     return modified_loc
 
+def cloc_analysis(repo_url):
+    try:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            clone_repo(repo_url, temp_dir)
+            json_output = run_cloc(temp_dir)
+            return {
+                "modified_loc": compute_modified_loc(json_output),
+                "error": None
+            }
+    except subprocess.CalledProcessError as e:
+        return {"modified_loc": None, "error": f"Process error: {str(e)}"}
+    except Exception as e:
+        return {"modified_loc": None, "error": f"Unexpected error: {str(e)}"}
+    
+
 def main():
     repo_url = get_github_repo()
-    with tempfile.TemporaryDirectory() as temp_dir:
-        clone_repo(repo_url, temp_dir)
-        json_output = run_cloc(temp_dir)
-        mloc = compute_modified_loc(json_output)
-        print(f"Modified LOC: {mloc}")
+    result = cloc_analysis(repo_url)
+    
+    if result["error"]:
+        print(f"Error: {result['error']}")
+        exit(1)
+        
+    print(f"Modified LOC: {result['modified_loc']}")
 
 if __name__ == "__main__":
     main()
