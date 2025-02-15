@@ -31,7 +31,7 @@ def compute_modified_loc(json_file):
     
     return modified_loc
 
-def cloc_analysis(repo_url):
+def fetch_loc_cloc(repo_url):
     try:
         with tempfile.TemporaryDirectory() as temp_dir:
             clone_repo(repo_url, temp_dir)
@@ -48,7 +48,7 @@ def cloc_analysis(repo_url):
 
 def main():
     repo_url = get_github_repo()
-    result = cloc_analysis(repo_url)
+    result = fetch_loc_cloc(repo_url)
     
     if result["error"]:
         print(f"Error: {result['error']}")
