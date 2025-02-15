@@ -3,6 +3,8 @@ import os
 import subprocess
 import tempfile
 import argparse
+import requests
+from urllib.parse import urlparse
 
 def get_github_repo():
     parser = argparse.ArgumentParser(description="Clone a GitHub repo and analyze LOC using cloc.")
@@ -33,17 +35,29 @@ def compute_modified_loc(json_file):
 
 def fetch_loc_cloc(repo_url):
     try:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            clone_repo(repo_url, temp_dir)
-            json_output = run_cloc(temp_dir)
-            return {
-                "modified_loc": compute_modified_loc(json_output),
-                "error": None
-            }
-    except subprocess.CalledProcessError as e:
-        return {"modified_loc": None, "error": f"Process error: {str(e)}"}
+        parsed = urlparse(repo_url)
+        if not all([parsed.scheme, parsed.netloc]):
+            return {"total_lines": None, "error": "Invalid URL format"}
+        
+        repo_path = parsed.path.strip("/")
+        if repo_path.endswith(".git"):
+            repo_path = repo_path[:-4]
+            
+        # Validate we have a proper GitHub path
+        if "/" not in repo_path or repo_path.count("/") != 1:
+            return {"total_lines": None, "error": "Invalid GitHub repository format"}
+
+        api_url = f"https://api.codetabs.com/v1/loc/?github={repo_path}"
+        response = requests.get(api_url, timeout=10)
+        response.raise_for_status()
+
+        loc_data = response.json()
+        total_lines = next((item['linesOfCode'] for item in loc_data if item['language'] == "Total"), None)
+        
+        return {"total_lines": total_lines, "error": None}
+
     except Exception as e:
-        return {"modified_loc": None, "error": f"Unexpected error: {str(e)}"}
+        return {"total_lines": None, "error": f"CodeTabs error: {str(e)}"}
     
 
 def main():
