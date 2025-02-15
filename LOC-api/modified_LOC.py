@@ -68,7 +68,7 @@ def main():
         print(f"Error: {result['error']}")
         exit(1)
         
-    print(f"Modified LOC: {result['modified_loc']}")
+    print(f"Modified LOC: {result['total_lines']}")
 
 if __name__ == "__main__":
     main()
