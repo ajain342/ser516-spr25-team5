@@ -1,5 +1,9 @@
 FROM python:3.13
 
+RUN apt-get update && \
+    apt-get install -y git cloc && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /LOC-api
 
 COPY requirements.txt .

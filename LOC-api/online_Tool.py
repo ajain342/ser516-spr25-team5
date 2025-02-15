@@ -14,7 +14,7 @@ def get_github_repo():
         repo_path = repo_path[:-4]
     return repo_path
 
-def fetch_loc_from_codetabs(repo_path):
+def fetch_loc_codetabs(repo_path):
     try:
         api_url = f"https://api.codetabs.com/v1/loc/?github={repo_path}"
         response = requests.get(api_url)
@@ -31,7 +31,7 @@ def fetch_loc_from_codetabs(repo_path):
 
 def main():
     repo_path = get_github_repo()    
-    resultOnline = fetch_loc_from_codetabs(repo_path)
+    resultOnline = fetch_loc_codetabs(repo_path)
     
     if resultOnline["error"]:
         print(f"Error: {resultOnline['error']}")
