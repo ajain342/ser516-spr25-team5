@@ -3,6 +3,7 @@ import os
 import subprocess
 import tempfile
 import argparse
+from urllib.parse import urlparse
 
 def get_github_repo():
     parser = argparse.ArgumentParser(description="Clone a GitHub repo and analyze LOC using cloc.")
@@ -44,8 +45,8 @@ def main():
     with tempfile.TemporaryDirectory() as temp_dir:
         clone_repo(repo_url, temp_dir)
         json_output = run_cloc(temp_dir)
-        mloc = compute_modified_loc(json_output)
-        print(f"Modified LOC: {mloc}")
+        modified_loc = compute_modified_loc(json_output)
+        print(f"Modified LOC: {modified_loc}")
 
 if __name__ == "__main__":
     main()

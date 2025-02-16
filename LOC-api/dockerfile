@@ -1,5 +1,12 @@
 FROM python:3.13
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    git \
+    cloc \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /LOC-api
 
 COPY requirements.txt .
@@ -10,4 +17,4 @@ COPY . .
 
 EXPOSE 5000
 
-CMD ["python","app.py"]
+CMD ["python", "app.py"]
