@@ -1,9 +1,8 @@
 from flask import Flask, request, jsonify
-from modified_LOC import fetch_loc_cloc
-from online_Tool import fetch_loc_codetabs
 from urllib.parse import urlparse
-
-app = Flask(__name__)
+from modified_LOC import clone_repo, run_cloc, compute_modified_loc
+from online_Tool import fetch_loc_codetabs
+import tempfile
 
 def parse_url(repo_url):
     parsed_url = urlparse(repo_url)
@@ -13,6 +12,8 @@ def parse_url(repo_url):
     if repo_path.count('/') != 1:
         return None
     return repo_path
+
+app = Flask(__name__)
 
 @app.route('/')
 def home():
@@ -34,16 +35,16 @@ def get_loc():
 
     try:
         if method == 'cloc':
-            result = fetch_loc_cloc(repo_url)
+            with tempfile.TemporaryDirectory() as temp_dir:
+                clone_repo(repo_url, temp_dir)
+                json_output = run_cloc(temp_dir)
+                result = compute_modified_loc(json_output)
         elif method == 'codetabs':
-            result = fetch_loc_codetabs(repo_path)
+            result = fetch_loc_codetabs(repo_path).get("total_lines", 0)
         else:
             return jsonify({"error": "Invalid method. Use 'cloc' or 'codetabs'"}), 400
         
-        if result.get('error'):
-            return jsonify(result), 500
-            
-        return jsonify(result)
+        return jsonify({"modified_loc": result})
     
     except Exception as e:
         return jsonify({
@@ -51,7 +52,6 @@ def get_loc():
             "method": method,
             "repo_url": repo_url
         }), 500
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
