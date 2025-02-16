@@ -17,7 +17,6 @@ def parse_url(repo_url):
 @app.route('/')
 def home():
     return jsonify(message="Visit /loc to calculate LOC")
-    return jsonify(message="Visit /loc to calculate LOC")
 
 @app.route('/loc', methods=['POST'])
 def get_loc():
@@ -55,5 +54,4 @@ def get_loc():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
     app.run(host='0.0.0.0', port=5000)
