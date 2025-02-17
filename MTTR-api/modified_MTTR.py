@@ -12,17 +12,27 @@ def fetch_closed_issues(repo_url):
         error_msg = response.json().get('message', 'Unknown error')
         raise Exception(f"GitHub API error: {error_msg}")
 
-    return [issue for issue in response.json() if 'pull_request' not in issue]
+    return response.json()
 
 def calculate_mttr(issues):
     """Calculates Mean Time to Repair (MTTR) and prints details for each issue."""
     repair_times = []
 
     for issue in issues:
-        if all(key in issue for key in ['created_at', 'closed_at']):
-            created = datetime.fromisoformat(issue['created_at'].rstrip("Z"))
-            closed = datetime.fromisoformat(issue['closed_at'].rstrip("Z"))
-            repair_times.append((closed - created).total_seconds())
+        if "created_at" in issue and "closed_at" in issue:
+            created_time = datetime.strptime(issue["created_at"], "%Y-%m-%dT%H:%M:%SZ")
+            closed_time = datetime.strptime(issue["closed_at"], "%Y-%m-%dT%H:%M:%SZ")
+            time_taken = (closed_time - created_time).total_seconds()
+
+            print(f"Issue #{issue['number']}:")
+            print(f"  Created: {created_time}")
+            print(f"  Closed:  {closed_time}")
+            print(f"  Time Taken: {time_taken / 3600:.2f} hours\n")
+
+            repair_times.append(time_taken)
+
+    if not repair_times:
+        return None
     
     return sum(repair_times)/len(repair_times)/3600 if repair_times else None
 
