@@ -5,14 +5,28 @@ from datetime import datetime
 def fetch_closed_issues(repo_url):
     """Fetches all closed issues using GitHub API."""
     api_url = repo_url.replace("github.com", "api.github.com/repos") + "/issues"
-    params = {"state": "closed", "per_page": 100} 
-    response = requests.get(api_url, params=params)
+    issues = []
+    page = 1
 
-    if response.status_code != 200:
-        error_msg = response.json().get('message', 'Unknown error')
-        raise Exception(f"GitHub API error: {error_msg}")
+    while True:
+        params = {"state": "closed", "per_page": 100, "page": page}
+        response = requests.get(api_url, params=params)
 
-    return response.json()
+        if response.status_code != 200:
+            error_msg = response.json().get('message', 'Unknown error')
+            raise Exception(f"GitHub API error: {error_msg}")
+
+        batch = response.json()
+        if not batch:
+            break  # No more issues left
+
+        # Filter out pull requests (PRs)
+        filtered_issues = [issue for issue in batch if "pull_request" not in issue]
+        issues.extend(filtered_issues)
+        
+        page += 1  # Go to next page
+
+    return issues
 
 def calculate_mttr(issues):
     """Calculates Mean Time to Repair (MTTR) and prints details for each issue."""
