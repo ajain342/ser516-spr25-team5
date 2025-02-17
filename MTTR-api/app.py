@@ -17,22 +17,19 @@ def get_mttr():
         return jsonify({"error": "Missing repo_url in request"}), 400
     
     repo_url = data['repo_url']
-    method = data.get('method', 'git-api')  # Default to git-api
-
-    try:
-        if method == 'git-api':
-            result = fetch_mttr_gitapi(repo_url)
-        else:
-            return jsonify({"error": "Invalid method. Use 'git-api' or 'online-mttr'"}), 400
-        
-        return jsonify({"MTTR": result})
+    result = fetch_mttr_gitapi(repo_url)
     
-    except Exception as e:
+    if result["error"]:
         return jsonify({
-            "error": f"Server error: {str(e)}",
-            "method": method,
+            "error": result["error"],
             "repo_url": repo_url
-        }), 500
+        }), 400 if "No closed" in result["error"] else 500
+    
+    return jsonify({
+        "repo_url": repo_url,
+        "mttr_hours": round(result["mttr"], 2),
+        "method": "git-api"
+    })
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

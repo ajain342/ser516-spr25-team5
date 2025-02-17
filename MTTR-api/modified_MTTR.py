@@ -2,12 +2,6 @@ import sys
 import requests
 from datetime import datetime
 
-def get_github_repo():
-    parser = argparse.ArgumentParser(description="Clone a GitHub repo and analyze LOC using cloc.")
-    parser.add_argument("repo_url", type=str, help="GitHub repository URL")
-    args = parser.parse_args()
-    return args.repo_url
-
 def fetch_closed_issues(repo_url):
     """Fetches all closed issues using GitHub API."""
     api_url = repo_url.replace("github.com", "api.github.com/repos") + "/issues"
@@ -15,49 +9,36 @@ def fetch_closed_issues(repo_url):
     response = requests.get(api_url, params=params)
 
     if response.status_code != 200:
-        print("Error fetching issues:", response.json())
-        sys.exit(1)
+        error_msg = response.json().get('message', 'Unknown error')
+        raise Exception(f"GitHub API error: {error_msg}")
 
-    return response.json()
+    return [issue for issue in response.json() if 'pull_request' not in issue]
 
 def calculate_mttr(issues):
     """Calculates Mean Time to Repair (MTTR) and prints details for each issue."""
     repair_times = []
 
-    print("\nClosed Issues Details:")
-    print("-" * 60)
-
     for issue in issues:
-        if "created_at" in issue and "closed_at" in issue:
-            created_time = datetime.strptime(issue["created_at"], "%Y-%m-%dT%H:%M:%SZ")
-            closed_time = datetime.strptime(issue["closed_at"], "%Y-%m-%dT%H:%M:%SZ")
-            time_taken = (closed_time - created_time).total_seconds()
-
-            print(f"Issue #{issue['number']}:")
-            print(f"  Created: {created_time}")
-            print(f"  Closed:  {closed_time}")
-            print(f"  Time Taken: {time_taken / 3600:.2f} hours\n")
-
-            repair_times.append(time_taken)
-
-    if not repair_times:
-        return None
-
-    mttr_seconds = sum(repair_times) / len(repair_times)
-    return mttr_seconds / 3600  
+        if all(key in issue for key in ['created_at', 'closed_at']):
+            created = datetime.fromisoformat(issue['created_at'].rstrip("Z"))
+            closed = datetime.fromisoformat(issue['closed_at'].rstrip("Z"))
+            repair_times.append((closed - created).total_seconds())
+    
+    return sum(repair_times)/len(repair_times)/3600 if repair_times else None
 
 def fetch_mttr_gitapi(repo_url):
     try:
+        repo_url = repo_url.rstrip("/")
         issues = fetch_closed_issues(repo_url)
+        
+        if not issues:
+            return {"mttr": None, "error": "No closed issues found"}
+        
         mttr = calculate_mttr(issues)
-
-        if mttr == None:
-            raise Exception("No Issues with the given project")
-
-        return {"Mean time to resolve": mttr, "error": None}
+        return {"mttr": mttr, "error": None} if mttr else {"mttr": None, "error": "No issues with valid timestamps"}
     
-    except:
-        return{"unknown ERROR occured"}
+    except Exception as e:
+        return {"mttr": None, "error": f"Calculation failed: {str(e)}"}
     
 
 if __name__ == "__main__":
