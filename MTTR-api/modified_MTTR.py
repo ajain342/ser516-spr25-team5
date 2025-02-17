@@ -2,6 +2,12 @@ import sys
 import requests
 from datetime import datetime
 
+def get_github_repo():
+    parser = argparse.ArgumentParser(description="Clone a GitHub repo and analyze LOC using cloc.")
+    parser.add_argument("repo_url", type=str, help="GitHub repository URL")
+    args = parser.parse_args()
+    return args.repo_url
+
 def fetch_closed_issues(repo_url):
     """Fetches all closed issues using GitHub API."""
     api_url = repo_url.replace("github.com", "api.github.com/repos") + "/issues"
@@ -39,6 +45,20 @@ def calculate_mttr(issues):
 
     mttr_seconds = sum(repair_times) / len(repair_times)
     return mttr_seconds / 3600  
+
+def fetch_mttr_gitapi(repo_url):
+    try:
+        issues = fetch_closed_issues(repo_url)
+        mttr = calculate_mttr(issues)
+
+        if mttr == None:
+            raise Exception("No Issues with the given project")
+
+        return {"Mean time to resolve": mttr, "error": None}
+    
+    except:
+        return{"unknown ERROR occured"}
+    
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
