@@ -5,21 +5,32 @@ from datetime import datetime
 def fetch_closed_issues(repo_url):
     """Fetches all closed issues using GitHub API."""
     api_url = repo_url.replace("github.com", "api.github.com/repos") + "/issues"
-    params = {"state": "closed", "per_page": 100} 
-    response = requests.get(api_url, params=params)
+    issues = []
+    page = 1
 
-    if response.status_code != 200:
-        print("Error fetching issues:", response.json())
-        sys.exit(1)
+    while True:
+        params = {"state": "closed", "per_page": 100, "page": page}
+        response = requests.get(api_url, params=params)
 
-    return response.json()
+        if response.status_code != 200:
+            error_msg = response.json().get('message', 'Unknown error')
+            raise Exception(f"GitHub API error: {error_msg}")
+
+        batch = response.json()
+        if not batch:
+            break  # No more issues left
+
+        # Filter out pull requests (PRs)
+        filtered_issues = [issue for issue in batch if "pull_request" not in issue]
+        issues.extend(filtered_issues)
+        
+        page += 1  # Go to next page
+
+    return issues
 
 def calculate_mttr(issues):
     """Calculates Mean Time to Repair (MTTR) and prints details for each issue."""
     repair_times = []
-
-    print("\nClosed Issues Details:")
-    print("-" * 60)
 
     for issue in issues:
         if "created_at" in issue and "closed_at" in issue:
@@ -36,9 +47,23 @@ def calculate_mttr(issues):
 
     if not repair_times:
         return None
+    
+    return sum(repair_times)/len(repair_times)/3600 if repair_times else None
 
-    mttr_seconds = sum(repair_times) / len(repair_times)
-    return mttr_seconds / 3600  
+def fetch_mttr_gitapi(repo_url):
+    try:
+        repo_url = repo_url.rstrip("/")
+        issues = fetch_closed_issues(repo_url)
+        
+        if not issues:
+            return {"mttr": None, "error": "No closed issues found"}
+        
+        mttr = calculate_mttr(issues)
+        return {"mttr": mttr, "error": None} if mttr else {"mttr": None, "error": "No issues with valid timestamps"}
+    
+    except Exception as e:
+        return {"mttr": None, "error": f"Calculation failed: {str(e)}"}
+    
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
