@@ -1,5 +1,5 @@
-# This tool is inspired from github repo: https://github.com/timescale/tsbs
-# Later the code was modified using chatgpt for accepting github repo link as an input.
+# This tool is inspired from github repo: https://github.com/github/issue-metrics
+# Later the code was modified for accepting github repo link as an input.
 # Also modified output to later generate visual representation.
 
 import argparse
