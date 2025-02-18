@@ -114,7 +114,7 @@ def main():
 
     if mttr is not None:
         print(f"\nTotal Closed Issues: {len(issues)}")
-        print(f"Mean Time to Repair (MTTR): {mttr:.2f} hours")
+        print(f"Mean Time to Resolve (MTTR): {mttr:.2f} hours")
     else:
         print("\nNo issues found with valid closure times.\n")
 
