@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify, render_template
 import requests
-import socket
 
 app = Flask(__name__)
 
@@ -29,7 +28,6 @@ def index():
 @app.route('/analyze', methods=['POST'])
 def analyze_repo():
     try:
-        print(f"Resolving cc_api: {socket.gethostbyname('cc_api')}")
         data = request.get_json()
         if not data or 'metric' not in data or 'repo_url' not in data:
             return jsonify({"error": "Missing required parameters: metric and repo_url"}), 400
@@ -70,8 +68,6 @@ def analyze_repo():
         return jsonify({"error": f"Microservice communication failed: {str(e)}"}), 502
     except Exception as e:
         return jsonify({"error": f"Server error: {str(e)}"}), 500
-    except socket.gaierror as e:
-        print(f"DNS Error: {str(e)}")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
