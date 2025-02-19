@@ -12,17 +12,20 @@ To run the LOC microservice individually open the terminal at ```src```
     docker network prune
     docker-compose up --build
 ```
+### LOC API link:
+```http://127.0.0.1:5000/analyze```
 
 ## Request Header:
 ```Content-Type : application/json```
 
 ## Request Body:
 ``` 
-    {
-        "metric": "loc/code-churn/mttr",
-        "repo_url": "https://github.com/your-repo-url", 
-        "method": "online/modified",
-    }
+{
+    "metric": "loc/code-churn/mttr",
+    "repo_url": "https://github.com/you-repo-url",
+    "method": "online/modified",
+    "num_commits_before_latest": <integer value less than total number of commits>
+}
 ```
 # Command to build and run LOC API Image:
 To run the LOC microservice individually open the terminal at ```modules/LOC_api```
@@ -70,14 +73,14 @@ To run the Code churn microservice individually open the terminal at ```modules/
 
 # Command to build and run MTTR API Image:
 To run the MTTR microservice individually open the terminal at ```modules/LOC_api```
-## CC Docker image build
+## MTTR Docker image build
 ```docker build --no-cache -t mttr_api .```
 
-## CC Docker image run
-```docker run -p 5003:5003 cc_api```
+## MTTR Docker image run
+```docker run -p 5003:5003 mttr_api```
 
-## CC API link
-```http://127.0.0.1:5003/code-churn```
+## MTTR API link
+```http://127.0.0.1:5003/mttr```
 
 ## Request Header:
 ```Content-Type : application/json```
