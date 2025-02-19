@@ -7,7 +7,7 @@ MICROSERVICES = {
     'code-churn': {
         'url': 'http://cc_api:5001/code-churn',
         'method': 'POST',
-        'params': ['repo_url', 'num_commits_before_latest']
+        'params': ['repo_url', 'method', 'num_commits_before_latest']
     },
     'loc': {
         'url': 'http://loc_api:5002/loc',
@@ -36,20 +36,16 @@ def analyze_repo():
         if metric not in MICROSERVICES:
             return jsonify({"error": f"Invalid metric. Choose from: {', '.join(MICROSERVICES.keys())}"}), 400
 
-        # Prepare request for microservice
         service = MICROSERVICES[metric]
         payload = {param: data.get(param) for param in service['params']}
-        payload['repo_url'] = data['repo_url']  # Ensure repo_url is always included
-
-        # Forward request to microservice
+        payload['repo_url'] = data['repo_url']  
         response = requests.request(
             method=service['method'],
             url=service['url'],
             json=payload,
-            timeout=30  # Adjust timeout as needed
+            timeout=30 
         )
 
-        # Handle microservice response
         if response.status_code != 200:
             return jsonify({
                 "error": f"Microservice error ({metric})",

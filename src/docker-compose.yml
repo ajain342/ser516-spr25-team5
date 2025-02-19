@@ -1,22 +1,20 @@
-version: '3.8'
-
 services:
   loc_api:
-    build: ./modules/LOC_api
+    build: ../modules/LOC_api
     ports:
       - "5002:5002"
     networks:
       - analysis-network
 
   mttr_api:
-    build: ./modules/MTTR_api
+    build: ../modules/MTTR_api
     ports:
       - "5003:5003"
     networks:
       - analysis-network
 
   cc_api:
-    build: ./modules/CC_api
+    build: ../modules/CC_api
     ports:
       - "5001:5001"
     networks:
