@@ -6,7 +6,6 @@ import argparse
 import requests
 from datetime import datetime
 import numpy as np
-
 class IssueWithMetrics:
     """A class to represent a GitHub issue with metrics."""
 
@@ -95,6 +94,16 @@ def calculate_mttr(issues_with_metrics):
         return None  # No valid issues
 
     return np.mean(repair_times) / 3600  # Convert seconds to hours
+
+def fetch_mttr_online(repo_url):
+    issues = fetch_issues(repo_url, None)
+
+    if not issues:
+        return {"mttr": None, "error": "No closed issues found"}
+
+    mttr = calculate_mttr(issues)
+    return {"mttr": mttr, "error": None} if mttr else {"mttr": None, "error": "No issues with valid timestamps"}
+
 
 def main():
     parser = argparse.ArgumentParser(description="Calculate Mean Time to Repair (MTTR) in a GitHub repo.")
