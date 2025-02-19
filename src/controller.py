@@ -4,9 +4,9 @@ import os
 
 if os.environ.get('DOCKER_ENV'):
     ui_dir = '/app/UI_Dashboard'
-
-base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Goes up to project_root
-ui_dir = os.path.join(base_dir, 'UI_Dashboard')
+else:
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ui_dir = os.path.join(base_dir, 'UI_Dashboard')
 
 app = Flask(__name__,
            template_folder=ui_dir,
@@ -81,8 +81,7 @@ def analyze_repo():
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 if __name__ == '__main__':
-    print(f"Controller file location: {os.path.abspath(__file__)}")
-    print(f"Project root: {base_dir}")
-    print(f"UI Directory: {ui_dir}")
-    print(f"Template exists? {os.path.exists(os.path.join(ui_dir, 'index.html'))}")  
+    print(f"DOCKER_ENV: {os.environ.get('DOCKER_ENV', 'False')}")
+    print(f"Template directory: {ui_dir}")
+    print(f"Template exists: {os.path.exists(os.path.join(ui_dir, 'index.html'))}") 
     app.run(host='0.0.0.0', port=5000, debug=False)
