@@ -1,20 +1,20 @@
 services:
   loc_api:
-    build: ../modules/LOC_api
+    build: ./modules/LOC_api
     ports:
       - "5002:5002"
     networks:
       - analysis-network
 
   mttr_api:
-    build: ../modules/MTTR_api
+    build: ./modules/MTTR_api
     ports:
       - "5003:5003"
     networks:
       - analysis-network
 
   cc_api:
-    build: ../modules/CC_api
+    build: ./modules/CC_api
     ports:
       - "5001:5001"
     networks:
@@ -24,6 +24,11 @@ services:
     build: .
     ports:
       - "5000:5000"
+    environment:
+      - DOCKER_ENV=true
+    volumes:
+      - ./UI_Dashboard:/app/UI_Dashboard
+      - ./src:/app
     depends_on:
       - loc_api
       - mttr_api
