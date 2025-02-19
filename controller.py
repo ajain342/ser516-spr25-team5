@@ -1,35 +1,35 @@
 from flask import Flask, request, jsonify, render_template
 import requests
+import socket
 
 app = Flask(__name__)
 
-# Microservice configuration (use Docker service names)
 MICROSERVICES = {
+    'code-churn': {
+        'url': 'http://cc_api:5001/code-churn',
+        'method': 'POST',
+        'params': ['repo_url', 'num_commits_before_latest']
+    },
     'loc': {
         'url': 'http://loc_api:5002/loc',
         'method': 'POST',
-        'params': ['repo_url', 'method']  # method: cloc/codetabs
+        'params': ['repo_url', 'method']  
     },
     'mttr': {
         'url': 'http://mttr_api:5003/mttr',
         'method': 'POST',
         'params': ['repo_url']
-    },
-    'code-churn': {
-        'url': 'http://cc_api:5001/code-churn',
-        'method': 'POST',
-        'params': ['repo_url', 'num_commits_before_latest']
     }
 }
 
 @app.route('/')
 def index():
-    return render_template('UI_Dashboard/index.html')  # Create this template later if needed
+    return render_template('./UI_Dashboard/index.html')  
 
 @app.route('/analyze', methods=['POST'])
 def analyze_repo():
-    """Central endpoint for all metric analysis"""
     try:
+        print(f"Resolving cc_api: {socket.gethostbyname('cc_api')}")
         data = request.get_json()
         if not data or 'metric' not in data or 'repo_url' not in data:
             return jsonify({"error": "Missing required parameters: metric and repo_url"}), 400
@@ -70,6 +70,8 @@ def analyze_repo():
         return jsonify({"error": f"Microservice communication failed: {str(e)}"}), 502
     except Exception as e:
         return jsonify({"error": f"Server error: {str(e)}"}), 500
+    except socket.gaierror as e:
+        print(f"DNS Error: {str(e)}")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)

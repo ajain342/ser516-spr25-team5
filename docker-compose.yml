@@ -35,4 +35,5 @@ services:
 
 networks:
   analysis-network:
+    name: analysis-network
     driver: bridge
