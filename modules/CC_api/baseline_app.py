@@ -39,10 +39,7 @@ def get_loc(repo_path, commit):
     return added_lines, deleted_lines, modified_lines
 
 @app.route('/baseline-CC', methods=['POST'])
-def get_git_code_churn():
-    data = request.json
-    repo_url = data.get("repo_url")
-    num_commits_before_latest = data.get("num_commits_before_latest", 1)
+def get_git_code_churn(repo_url, num_commits_before_latest):
     
     if not repo_url:
         return jsonify({"error": "Missing repository URL"}), 400
@@ -71,14 +68,15 @@ def get_git_code_churn():
             deleted_lines += d
             modified_lines += m
         
-        return jsonify({
+        return {
+            "method": "online",
             "added_lines": added_lines,
             "commit_range": f"{start_commit} to {end_commit}",
             "deleted_lines": deleted_lines,
             "modified_lines": modified_lines,
             "net_change or churn": added_lines + deleted_lines + modified_lines,
             "total_commits": total_commits
-        })
+        }
     
     finally:
         if os.path.exists(repo_path):

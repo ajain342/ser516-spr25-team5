@@ -27,24 +27,24 @@ def get_loc():
         return jsonify({"error": "Missing repo_url in request"}), 400
     
     repo_url = data['repo_url']
-    method = data.get('method', 'cloc')  # Default to cloc
+    method = data.get('method')  # Default to cloc
 
     repo_path = parse_url(repo_url)
     if not repo_path:
         return jsonify({"error": "Invalid GitHub repository URL"}), 400
 
     try:
-        if method == 'cloc':
+        if method == 'modified':
             with tempfile.TemporaryDirectory() as temp_dir:
                 clone_repo(repo_url, temp_dir)
                 json_output = run_cloc(temp_dir)
                 result = compute_modified_loc(json_output)
-        elif method == 'codetabs':
+        elif method == 'online':
             result = fetch_loc_codetabs(repo_path).get("total_lines", 0)
         else:
-            return jsonify({"error": "Invalid method. Use 'cloc' or 'codetabs'"}), 400
+            return jsonify({"error": "Invalid method. Use 'online' or 'modified'"}), 400
         
-        return jsonify({"modified_loc": result})
+        return jsonify({"method" : method, "Result": result})
     
     except Exception as e:
         return jsonify({
@@ -54,4 +54,4 @@ def get_loc():
         }), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5002)

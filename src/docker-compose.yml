@@ -1,0 +1,37 @@
+services:
+  loc_api:
+    build: ../modules/LOC_api
+    ports:
+      - "5002:5002"
+    networks:
+      - analysis-network
+
+  mttr_api:
+    build: ../modules/MTTR_api
+    ports:
+      - "5003:5003"
+    networks:
+      - analysis-network
+
+  cc_api:
+    build: ../modules/CC_api
+    ports:
+      - "5001:5001"
+    networks:
+      - analysis-network
+
+  controller:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - loc_api
+      - mttr_api
+      - cc_api
+    networks:
+      - analysis-network
+
+networks:
+  analysis-network:
+    name: analysis-network
+    driver: bridge
