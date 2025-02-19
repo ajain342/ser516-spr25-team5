@@ -17,7 +17,7 @@ MICROSERVICES = {
     'mttr': {
         'url': 'http://mttr_api:5003/mttr',
         'method': 'POST',
-        'params': ['repo_url']
+        'params': ['repo_url', 'method']
     }
 }
 

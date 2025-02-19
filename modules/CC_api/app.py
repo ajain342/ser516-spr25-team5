@@ -43,43 +43,47 @@ def compute_code_churn(repo, start_commit, end_commit):
 
 @app.route('/code-churn', methods=['POST'])
 def code_churn():
-    
+
+    method = data.get('method', 'modified')    
     try:
-        data = request.get_json()
-        repo_url = data.get("repo_url")
-        num_commits_before_latest = int(data.get("num_commits_before_latest", 0))
+        if method == "modified":
+            data = request.get_json()
+            repo_url = data.get("repo_url")
+            num_commits_before_latest = int(data.get("num_commits_before_latest", 0))
 
-        if not repo_url:
-            return jsonify({"error": "Missing 'repo_url' in request data"}), 400
+            if not repo_url:
+                return jsonify({"error": "Missing 'repo_url' in request data"}), 400
 
+            
+            repo, repo_path = clone_repo(repo_url)
+            
+            total_commits = get_commit_count(repo)
+            
+            if num_commits_before_latest < 0 or num_commits_before_latest >= total_commits:
+                return jsonify({"error": "invalid number of commits before latest"}), 400
+
+            
+            start_commit = f"HEAD~{num_commits_before_latest}" if num_commits_before_latest > 0 else "HEAD~1"
+            end_commit = "HEAD"
+
+            
+            added, deleted, modified = compute_code_churn(repo, start_commit, end_commit)
+
+            
+            repo.close()
+            os.system(f"rm -rf {repo_path}")
+
+            return jsonify({
+                "total_commits": total_commits,
+                "commit_range": f"{start_commit} to {end_commit}",
+                "added_lines": added,
+                "deleted_lines": deleted,
+                "modified_lines": modified,
+                "net_change or churn": added + deleted + modified
+            })
         
-        repo, repo_path = clone_repo(repo_url)
-
-        
-        total_commits = get_commit_count(repo)
-        
-        if num_commits_before_latest < 0 or num_commits_before_latest >= total_commits:
-            return jsonify({"error": "invalid number of commits before latest"}), 400
-
-        
-        start_commit = f"HEAD~{num_commits_before_latest}" if num_commits_before_latest > 0 else "HEAD~1"
-        end_commit = "HEAD"
-
-        
-        added, deleted, modified = compute_code_churn(repo, start_commit, end_commit)
-
-        
-        repo.close()
-        os.system(f"rm -rf {repo_path}")
-
-        return jsonify({
-            "total_commits": total_commits,
-            "commit_range": f"{start_commit} to {end_commit}",
-            "added_lines": added,
-            "deleted_lines": deleted,
-            "modified_lines": modified,
-            "net_change or churn": added + deleted + modified
-        })
+        elif method == "online":
+            return jsonify({"online_cc": "called"})
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500

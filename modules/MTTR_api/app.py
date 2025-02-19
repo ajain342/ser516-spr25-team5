@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 from urllib.parse import urlparse
 from modified_MTTR import fetch_mttr_gitapi
 from online_tool_MTTR import fetch_mttr_online
-import tempfile
 
 app = Flask(__name__)
 
@@ -18,7 +17,7 @@ def get_mttr():
         return jsonify({"error": "Missing repo_url in request"}), 400
     
     repo_url = data['repo_url']
-    method = data.get('method', 'modified') # default to modified
+    method = data.get('method') 
     try:
         if method == 'modified':
             result = fetch_mttr_gitapi(repo_url)
