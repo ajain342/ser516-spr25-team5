@@ -16,7 +16,8 @@ function calculate() {
     // Prepare payload
     const payload = {
         metric: metric,
-        repo_url: repoUrl
+        repo_url: repoUrl,
+        method: "modified"
     };
 
     // Add metric-specific parameters (e.g., for code-churn)
