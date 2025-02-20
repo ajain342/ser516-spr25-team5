@@ -73,7 +73,7 @@ def code_churn():
                 "added_lines": added,
                 "deleted_lines": deleted,
                 "modified_lines": modified,
-                "net_change or churn": added + deleted + modified
+                "result": added + deleted + modified
             })
         
         elif method == "online":

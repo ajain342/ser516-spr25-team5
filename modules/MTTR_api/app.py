@@ -33,7 +33,7 @@ def get_mttr():
     
         return jsonify({
             "repo_url": repo_url,
-            "mttr_hours": round(result["mttr"], 2),
+            "result": round(result["mttr"], 2),
             "method": method
         })
         

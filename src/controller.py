@@ -1,7 +1,17 @@
 from flask import Flask, request, jsonify, render_template
 import requests
+import os
 
-app = Flask(__name__)
+if os.environ.get('DOCKER_ENV'):
+    ui_dir = '/app/UI_Dashboard'
+else:
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ui_dir = os.path.join(base_dir, 'UI_Dashboard')
+
+app = Flask(__name__,
+           template_folder=ui_dir,
+           static_folder=ui_dir,
+           static_url_path='')
 
 MICROSERVICES = {
     'code-churn': {
@@ -21,12 +31,17 @@ MICROSERVICES = {
     }
 }
 
-@app.route('/')
+@app.route('/home')
 def index():
-    return render_template('./UI_Dashboard/index.html')  
+        try:
+            print(f"Attempting to load template from: {app.template_folder}")
+            return render_template('index.html')
+        except Exception as e:
+            print(f"Template loading error: {str(e)}")
+            return str(e), 500
 
 @app.route('/analyze', methods=['POST'])
-def analyze_repo():
+def analyze_repo():  
     try:
         data = request.get_json()
         if not data or 'metric' not in data or 'repo_url' not in data:
@@ -66,4 +81,7 @@ def analyze_repo():
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 if __name__ == '__main__':
+    print(f"DOCKER_ENV: {os.environ.get('DOCKER_ENV', 'False')}")
+    print(f"Template directory: {ui_dir}")
+    print(f"Template exists: {os.path.exists(os.path.join(ui_dir, 'index.html'))}") 
     app.run(host='0.0.0.0', port=5000, debug=False)
