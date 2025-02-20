@@ -1,13 +1,21 @@
+let resultChart; // Variable to hold the chart instance
+
 function calculate() {
     const repoUrl = document.getElementById('githubLink').value;
     const metric = document.getElementById('metric').value;
     const resultDiv = document.getElementById('result');
     const calculateBtn = document.querySelector('.btn-primary');
+    const chartCanvas = document.getElementById('resultChart');
 
     // Clear previous results
     resultDiv.style.display = 'none';
     resultDiv.innerHTML = '';
 
+    // Clear the chart if it exists
+    if (resultChart) {
+        resultChart.destroy(); // Destroy the existing chart instance
+    }
+    
     // Basic validation
     if (!repoUrl) {
         alert('Please enter a GitHub repository URL');
@@ -54,11 +62,16 @@ function calculate() {
         resultContent += `<strong>Metric:</strong> ${data.metric || "N/A"}<br>`;
         resultContent += `<strong>Repo:</strong> ${repoUrl}<br>`;
 
-        if (data.metric === 'mttr') {
-            // Display MTTR result as a simple JSON format
-            resultContent += `<strong>Result:</strong> ${data.result.result || "N/A"}<br>`;
-            //resultContent += `<strong>Result:</strong> ${JSON.stringify(data.result)}`;
+        // Prepare data for the chart
+        let chartData = {
+            labels: [],
+            data: []
+        };
 
+        if (data.metric === 'mttr') {
+            resultContent += `<strong>MTTR Hours:</strong> ${data.result.result || "N/A"}<br>`;
+            chartData.labels = ['MTTR'];
+            chartData.data = [data.result.result];
         } else if (data.metric === 'code-churn' && typeof data.result === 'object') {
             resultContent += `<strong>Added Lines:</strong> ${data.result.added_lines || "N/A"}<br>`;
             resultContent += `<strong>Deleted Lines:</strong> ${data.result.deleted_lines || "N/A"}<br>`;
@@ -66,14 +79,44 @@ function calculate() {
             resultContent += `<strong>Net Change (Churn):</strong> ${data.result["net_change or churn"] || "N/A"}<br>`;
             resultContent += `<strong>Total Commits:</strong> ${data.result.total_commits || "N/A"}<br>`;
             resultContent += `<strong>Commit Range:</strong> ${data.result.commit_range || "N/A"}`;
+            chartData.labels = ['Added Lines', 'Deleted Lines', 'Modified Lines'];
+            chartData.data = [data.result.added_lines, data.result.deleted_lines, data.result.modified_lines];
         } else if (data.metric === 'loc' && data.result !== undefined) {
             resultContent += `<strong>Lines of Code:</strong> ${data.result.result}`;
-        } else {
-            resultContent += `<strong>Result:</strong> ${JSON.stringify(data.result, null, 2)}`;
+            chartData.labels = ['Lines of Code'];
+            chartData.data = [data.result.result];
         }
 
         resultContent += `</div>`;
         resultDiv.innerHTML = resultContent;
+
+        // Display the chart
+        chartCanvas.style.display = 'block';
+        const chartType = (data.metric === 'mttr' || data.metric === 'loc') ? 'bar' : 'pie'; // Bar for LOC and MTTR, pie for Code Churn
+
+        resultChart = new Chart(chartCanvas, {
+            type: chartType,
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Metric Values',
+                    data: chartData.data,
+                    backgroundColor: chartType === 'bar' ? '#36A2EB' : ['#36A2EB', '#FF6384', '#FFCE56'],
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Metric Visualization'
+                    }
+                }
+            }
+        });
     })
     .catch(error => {
         resultDiv.style.display = 'block';
@@ -90,4 +133,12 @@ function resetFields() {
     document.getElementById('githubLink').value = '';
     document.getElementById('metric').selectedIndex = 0;
     document.getElementById('result').style.display = 'none';
+    
+    // Hide the chart and destroy it if it exists
+    const chartCanvas = document.getElementById('resultChart');
+    if (resultChart) {
+        resultChart.destroy(); // Destroy the existing chart instance
+        resultChart = null; // Reset the chart instance variable
+    }
+    chartCanvas.style.display = 'none'; // Hide the chart canvas
 }
