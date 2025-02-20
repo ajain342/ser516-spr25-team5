@@ -2,6 +2,7 @@ function calculate() {
     const repoUrl = document.getElementById('githubLink').value;
     const metric = document.getElementById('metric').value;
     const resultDiv = document.getElementById('result');
+    const calculateBtn = document.querySelector('.btn-primary');
 
     // Clear previous results
     resultDiv.style.display = 'none';
@@ -13,6 +14,10 @@ function calculate() {
         return;
     }
 
+    // Disable button and show loading state
+    calculateBtn.innerText = 'Loading...';
+    calculateBtn.disabled = true;
+
     // Prepare payload
     const payload = {
         metric: metric,
@@ -20,9 +25,8 @@ function calculate() {
         method: "modified"
     };
 
-    // Add metric-specific parameters (e.g., for code-churn)
     if (metric === 'code-churn') {
-        payload.num_commits_before_latest = 10; // Default value or add UI input
+        payload.num_commits_before_latest = 10;
     }
 
     // Send request to backend
@@ -49,11 +53,10 @@ function calculate() {
         .catch(error => {
             resultDiv.style.display = 'block';
             resultDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
+        })
+        .finally(() => {
+            // Re-enable button after fetch completes
+            calculateBtn.innerText = 'Calculate';
+            calculateBtn.disabled = false;
         });
-}
-
-function resetFields() {
-    document.getElementById('githubLink').value = '';
-    document.getElementById('metric').selectedIndex = 0;
-    document.getElementById('result').style.display = 'none';
 }
