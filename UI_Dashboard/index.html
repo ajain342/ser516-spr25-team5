@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Code Metrics Calculator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Include Chart.js -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>GitHub Code Metrics Calculator</h2>
+        <input type="text" id="githubLink" placeholder="Enter GitHub Repository URL">
+        <select id="metric">
+            <option value="loc">Line of Code</option>
+            <option value="code-churn">Code Churn</option>
+            <option value="mttr">MTTR</option>
+        </select>
+        <button class="btn-primary" onclick="calculate()">Calculate</button>
+        <button class="btn-secondary" onclick="resetFields()">Reset</button>
+
+        <div id="result" class="result" style="display:none;"></div>
+        
+        <!-- Canvas element for Chart.js -->
+        <canvas id="resultChart" width="400" height="400" style="display:none;"></canvas>
+        <canvas id="resultChart2" width="400" height="400" style="display:none;"></canvas>
+    </div>
+</body>
+
+</html>

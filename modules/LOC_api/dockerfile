@@ -1,0 +1,20 @@
+FROM python:3.13
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    git \
+    cloc \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /LOC_api
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 5002
+
+CMD ["python", "app.py"]
