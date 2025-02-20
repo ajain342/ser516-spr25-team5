@@ -44,7 +44,7 @@ def get_loc():
         else:
             return jsonify({"error": "Invalid method. Use 'online' or 'modified'"}), 400
         
-        return jsonify({"method" : method, "Result": result})
+        return jsonify({"method" : method, "result": result})
     
     except Exception as e:
         return jsonify({

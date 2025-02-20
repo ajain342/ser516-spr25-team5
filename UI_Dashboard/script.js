@@ -4,11 +4,9 @@ function calculate() {
     const resultDiv = document.getElementById('result');
     const calculateBtn = document.querySelector('.btn-primary');
 
-    // Clear previous results
     resultDiv.style.display = 'none';
     resultDiv.innerHTML = '';
 
-    // Basic validation
     if (!repoUrl) {
         alert('Please enter a GitHub repository URL');
         return;
@@ -29,7 +27,6 @@ function calculate() {
         payload.num_commits_before_latest = 10;
     }
 
-    // Send request to backend
     fetch('/analyze', {
         method: 'POST',
         headers: {
