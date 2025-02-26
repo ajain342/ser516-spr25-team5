@@ -88,7 +88,7 @@ function calculate() {
                 resultContent += `<strong>Added Lines:</strong> ${data.result.added_lines || "N/A"}<br>`;
                 resultContent += `<strong>Deleted Lines:</strong> ${data.result.deleted_lines || "N/A"}<br>`;
                 resultContent += `<strong>Modified Lines:</strong> ${data.result.modified_lines || "N/A"}<br>`;
-                resultContent += `<strong>Net Change (Churn):</strong> ${data.result["net_change or churn"] || "N/A"}<br>`;
+                resultContent += `<strong>Net Change (Churn):</strong> ${data.result.result || "N/A"}<br>`;
                 resultContent += `<strong>Total Commits:</strong> ${data.result.total_commits || "N/A"}<br>`;
                 resultContent += `<strong>Commit Range:</strong> ${data.result.commit_range || "N/A"}`;
                 chartData.labels = ['Added Lines', 'Deleted Lines', 'Modified Lines'];
