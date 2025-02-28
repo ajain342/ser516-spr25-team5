@@ -1,7 +1,7 @@
 let resultChart; // Variable to hold the first chart instance
 let resultChart2; // Variable to hold the second chart instance
 
-function calculate() {
+async function  calculate() {
     const repoUrlInput = document.getElementById('githubLink').value;
     const metric = document.getElementById('metric').value;
     const resultDiv = document.getElementById('result');
@@ -45,6 +45,10 @@ function calculate() {
 
     if (metric === 'code-churn') {
         payload.num_commits_before_latest = 10;
+        document.querySelector('.charts-container > *').style.maxWidth = '100%';
+    }
+    else{
+        document.querySelector('.charts-container > *').style.maxWidth = '50%';
     }
 
     // Get canvas elements for each chart
@@ -52,7 +56,7 @@ function calculate() {
     const chartCanvas2 = document.getElementById('resultChart2');
 
     // First API call (modified method)
-    fetch('/analyze', {
+    await fetch('/analyze', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -63,7 +67,7 @@ function calculate() {
         .then(data => {
             resultDiv.style.display = 'block';
             if (data.error) {
-                resultDiv.innerHTML = `<div class="result-box error"><strong>Error:</strong> ${data.error}</div>`;
+                // resultDiv.innerHTML = `<div class="result-box error"><strong>Error:</strong> ${data.error}</div>`;
                 return;
             }
 
@@ -119,14 +123,16 @@ function calculate() {
                     responsive: true,
                     plugins: {
                         legend: { position: 'top' },
-                        title: { display: true, text: 'Metric Visualization (Modified)' }
-                    }
+                        title: { display: true, text: 'Metric Visualization (Modified)' },
+                        animation: false
+                    },
+
                 }
             });
         })
         .catch(error => {
-            resultDiv.style.display = 'block';
-            resultDiv.innerHTML = `<div class="result-box error"><strong>Error:</strong> ${error.message}</div>`;
+            // resultDiv.style.display = 'block';
+            // resultDiv.innerHTML = `<div class="result-box error"><strong>Error:</strong> ${error.message}</div>`;
         })
         .finally(() => {
             calculateBtn.innerText = 'Calculate';
@@ -134,7 +140,7 @@ function calculate() {
         });
 
     // Second API call (online method)
-    fetch('/analyze', {
+    await fetch('/analyze', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -146,7 +152,7 @@ function calculate() {
             // Reuse the resultDiv if necessary, or adjust as needed
             resultDiv.style.display = 'block';
             if (data.error) {
-                resultDiv.innerHTML = `<div class="result-box error"><strong>Error:</strong> ${data.error}</div>`;
+                // resultDiv.innerHTML = `<div class="result-box error"><strong>Error:</strong> ${data.error}</div>`;
                 return;
             }
 
@@ -202,14 +208,15 @@ function calculate() {
                     responsive: true,
                     plugins: {
                         legend: { position: 'top' },
-                        title: { display: true, text: 'Metric Visualization (Online)' }
+                        title: { display: true, text: 'Metric Visualization (Online)' },
+                        animation: false
                     }
                 }
             });
         })
         .catch(error => {
-            resultDiv.style.display = 'block';
-            resultDiv.innerHTML = `<div class="result-box error"><strong>Error:</strong> ${error.message}</div>`;
+            // resultDiv.style.display = 'block';
+            // resultDiv.innerHTML = `<div class="result-box error"><strong>Error:</strong> ${error.message}</div>`;
         })
         .finally(() => {
             calculateBtn.innerText = 'Calculate';
