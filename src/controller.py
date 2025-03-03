@@ -33,15 +33,15 @@ MICROSERVICES = {
 
 @app.route('/home')
 def index():
-        try:
-            print(f"Attempting to load template from: {app.template_folder}")
-            return render_template('index.html')
-        except Exception as e:
-            print(f"Template loading error: {str(e)}")
-            return str(e), 500
+    try:
+        print(f"Attempting to load template from: {app.template_folder}")
+        return render_template('index.html')
+    except Exception as e:
+        print(f"Template loading error: {str(e)}")
+        return str(e), 500
 
 @app.route('/analyze', methods=['POST'])
-def analyze_repo():  
+def analyze_repo():
     try:
         data = request.get_json()
         if not data or 'metric' not in data or 'repo_url' not in data:
@@ -53,7 +53,8 @@ def analyze_repo():
 
         service = MICROSERVICES[metric]
         payload = {param: data.get(param) for param in service['params']}
-        payload['repo_url'] = data['repo_url']  
+        payload['repo_url'] = data['repo_url']
+
         response = requests.request(
             method=service['method'],
             url=service['url'],
@@ -62,9 +63,10 @@ def analyze_repo():
         )
 
         if response.status_code != 200:
+            microservice_data = response.json()
+            msg_from_microservice = microservice_data.get("error", "")
             return jsonify({
-                "error": f"Microservice error ({metric})",
-                "details": response.json()
+                "error": f"Microservice error: {msg_from_microservice}"
             }), response.status_code
 
         return jsonify({
@@ -83,5 +85,5 @@ def analyze_repo():
 if __name__ == '__main__':
     print(f"DOCKER_ENV: {os.environ.get('DOCKER_ENV', 'False')}")
     print(f"Template directory: {ui_dir}")
-    print(f"Template exists: {os.path.exists(os.path.join(ui_dir, 'index.html'))}") 
+    print(f"Template exists: {os.path.exists(os.path.join(ui_dir, 'index.html'))}")
     app.run(host='0.0.0.0', port=5000, debug=False)
