@@ -17,6 +17,7 @@ def clone_repo(repo_url, temp_dir):
     except subprocess.CalledProcessError:
         print("Failed to clone repository.")
         exit(1)
+    return temp_dir
 
 def run_cloc(temp_dir):
     output_file = os.path.join(temp_dir, "cloc_output.json")
@@ -30,14 +31,12 @@ def run_cloc(temp_dir):
 def compute_modified_loc(json_file):
     with open(json_file, "r") as file:
         data = json.load(file)
-    
     modified_loc = 0
     for lang, stats in data.items():
-        if isinstance(stats, dict):  # Ensure it's not metadata
+        if isinstance(stats, dict):
             code = stats.get("code", 0)
             comments = stats.get("comment", 0)
             modified_loc += code + (comments / 2)
-    
     return modified_loc
 
 def main():

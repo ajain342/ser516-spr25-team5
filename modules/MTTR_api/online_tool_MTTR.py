@@ -1,14 +1,9 @@
-# This tool is inspired from github repo: https://github.com/github/issue-metrics
-# Later the code was modified for accepting github repo link as an input.
-# Also modified output to later generate visual representation.
-
 import argparse
 import requests
 from datetime import datetime
 import numpy as np
-class IssueWithMetrics:
-    """A class to represent a GitHub issue with metrics."""
 
+class IssueWithMetrics:
     def __init__(self, number, title, html_url, author, created_at, closed_at):
         self.number = number
         self.title = title
@@ -21,16 +16,6 @@ class IssueWithMetrics:
         )
 
 def fetch_issues(repo_url, token=None):
-    """
-    Fetches closed issues from a GitHub repository.
-    
-    Args:
-        repo_url (str): GitHub repository URL.
-        token (str): GitHub personal access token (optional for higher rate limits).
-
-    Returns:
-        List[IssueWithMetrics]: List of issues with time to resolve.
-    """
     repo_path = repo_url.replace("https://github.com/", "").strip("/")
     api_url = f"https://api.github.com/repos/{repo_path}/issues"
     headers = {"Authorization": f"token {token}"} if token else {}
@@ -41,9 +26,10 @@ def fetch_issues(repo_url, token=None):
     while True:
         response = requests.get(api_url, headers=headers, params={"state": "closed", "per_page": 100, "page": page})
         if response.status_code != 200:
-            print("Error fetching issues:", response.json())
-            return []
-
+            if response.status_code in (400, 403, 404):
+                raise Exception("Failed to fetch issues: Repository may be private or does not exist.")
+            else:
+                raise Exception(f"Error fetching issues: {response.json()} (status {response.status_code})")
         issues = response.json()
         if not issues:
             break  # No more issues
@@ -71,15 +57,6 @@ def fetch_issues(repo_url, token=None):
     return issues_with_metrics
 
 def calculate_mttr(issues_with_metrics):
-    """
-    Calculate Mean Time to Repair (MTTR) in hours.
-
-    Args:
-        issues_with_metrics (List[IssueWithMetrics]): A list of issues with their metrics.
-
-    Returns:
-        float: Mean Time to Repair in hours.
-    """
     repair_times = []
 
     for issue in issues_with_metrics:
@@ -93,39 +70,44 @@ def calculate_mttr(issues_with_metrics):
     if not repair_times:
         return None  # No valid issues
 
-    return np.mean(repair_times) / 3600  # Convert seconds to hours
+    return float(np.mean(repair_times) / 3600)  # Convert seconds to hours
 
 def fetch_mttr_online(repo_url):
-    issues = fetch_issues(repo_url, None)
+    try:
+        issues = fetch_issues(repo_url, token=None)
+        if not issues:
+            return {"mttr": None, "error": "No closed issues found"}
 
-    if not issues:
-        return {"mttr": None, "error": "No closed issues found"}
+        mttr = calculate_mttr(issues)
+        if mttr is None:
+            return {"mttr": None, "error": "No issues with valid timestamps"}
+        return {"mttr": mttr, "error": None}
 
-    mttr = calculate_mttr(issues)
-    return {"mttr": mttr, "error": None} if mttr else {"mttr": None, "error": "No issues with valid timestamps"}
-
+    except Exception as e:
+        return {"mttr": None, "error": str(e)}
 
 def main():
     parser = argparse.ArgumentParser(description="Calculate Mean Time to Repair (MTTR) in a GitHub repo.")
     parser.add_argument("repo_url", help="GitHub repository URL (e.g., https://github.com/user/repo)")
     parser.add_argument("--token", help="GitHub personal access token (optional for higher API rate limits)")
-
     args = parser.parse_args()
     
-    print(f"Fetching issues from {args.repo_url}...\n")
-    issues = fetch_issues(args.repo_url, args.token)
+    try:
+        print(f"Fetching issues from {args.repo_url}...\n")
+        issues = fetch_issues(args.repo_url, args.token)
 
-    if not issues:
-        print("No closed issues found.")
-        return
+        if not issues:
+            print("No closed issues found.")
+            return
 
-    mttr = calculate_mttr(issues)
-
-    if mttr is not None:
-        print(f"\nTotal Closed Issues: {len(issues)}")
-        print(f"Mean Time to Resolve (MTTR): {mttr:.2f} hours")
-    else:
-        print("\nNo issues found with valid closure times.\n")
+        mttr = calculate_mttr(issues)
+        if mttr is not None:
+            print(f"\nTotal Closed Issues: {len(issues)}")
+            print(f"Mean Time to Resolve (MTTR): {mttr:.2f} hours")
+        else:
+            print("\nNo issues found with valid closure times.\n")
+    except Exception as e:
+        print(f"Error: {e}")
 
 if __name__ == "__main__":
     main()

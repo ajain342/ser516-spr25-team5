@@ -1,16 +1,17 @@
-let resultChart; // Variable to hold the first chart instance
-let resultChart2; // Variable to hold the second chart instance
+let resultChart;  // For the first chart instance
+let resultChart2; // For the second chart instance
 
-async function  calculate() {
+async function calculate() {
     const repoUrlInput = document.getElementById('githubLink').value;
     const metric = document.getElementById('metric').value;
     const resultDiv = document.getElementById('result');
     const calculateBtn = document.querySelector('.btn-primary');
 
-    // Clear previous results and charts
+    // Clear previous results
     resultDiv.style.display = 'none';
     resultDiv.innerHTML = '';
 
+    // Destroy any existing charts
     if (resultChart) {
         resultChart.destroy();
         resultChart = null;
@@ -20,94 +21,104 @@ async function  calculate() {
         resultChart2 = null;
     }
 
-    // Basic validation
+    // Basic input check
     if (!repoUrlInput) {
         alert('Please enter a GitHub repository URL');
         return;
     }
 
-    // Disable button and show loading state
+    // Validate that the URL looks like a GitHub repository link.
+    const githubUrlPattern = /^https?:\/\/(www\.)?github\.com\/[^/]+\/[^/]+/i;
+    if (!githubUrlPattern.test(repoUrlInput)) {
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = `
+            <div class="result-box error">
+                <strong>Error:</strong> Please provide a valid public GitHub repository URL.
+                <br>Example: https://github.com/username/reponame
+            </div>`;
+        return;
+    }
+
     calculateBtn.innerText = 'Loading...';
     calculateBtn.disabled = true;
 
-    // Prepare payloads for both API calls
+    // Prepare payloads for both API calls (modified & online)
     const payload = {
         metric: metric,
         repo_url: repoUrlInput,
         method: "modified"
     };
-
-    const payload_online = {
+    const payloadOnline = {
         metric: metric,
         repo_url: repoUrlInput,
         method: "online"
     };
 
+    // If code-churn is selected, set additional parameter and adjust layout.
     if (metric === 'code-churn') {
         payload.num_commits_before_latest = 10;
         document.querySelector('.charts-container > *').style.maxWidth = '100%';
-    }
-    else{
+    } else {
         document.querySelector('.charts-container > *').style.maxWidth = '50%';
     }
 
-    // Get canvas elements for each chart
     const chartCanvas1 = document.getElementById('resultChart');
     const chartCanvas2 = document.getElementById('resultChart2');
 
-    // First API call (modified method)
+    // --- 1) "modified" API call ---
     await fetch('/analyze', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     })
-        .then(response => response.json())
-        .then(data => {
+    .then(async response => {
+        if (!response.ok) {
+            const errorBody = await response.json();
+            throw new Error(errorBody.error || response.statusText);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.error) {
             resultDiv.style.display = 'block';
-            if (data.error) {
-                // resultDiv.innerHTML = `<div class="result-box error"><strong>Error:</strong> ${data.error}</div>`;
-                return;
-            }
-
+            resultDiv.innerHTML += `<div class="result-box error">
+                <strong>Error (modified):</strong> ${data.error}
+            </div>`;
+        } else {
+            // Append successful result content
+            resultDiv.style.display = 'block';
             let resultContent = `<div class="result-box">`;
-            const repoUrl = data.repo_url ? `<a href="${data.repo_url}" target="_blank">${data.repo_url}</a>` : "N/A";
+            const repoUrl = data.repo_url 
+                ? `<a href="${data.repo_url}" target="_blank">${data.repo_url}</a>` 
+                : "N/A";
             resultContent += `<strong>Metric:</strong> ${data.metric || "N/A"}<br>`;
             resultContent += `<strong>Repo:</strong> ${repoUrl}<br>`;
 
-            // Prepare chart data
-            let chartData = {
-                labels: [],
-                data: []
-            };
-
-            let chartType = 'bar'; // default
-
+            let chartData = { labels: [], data: [] };
+            let chartType = 'bar';
+            let serviceResult = data.result;
             if (data.metric === 'mttr') {
-                resultContent += `<strong>MTTR Hours:</strong> ${data.result.result || "N/A"}<br>`;
+                resultContent += `<strong>MTTR Hours:</strong> ${serviceResult.result || "N/A"}<br>`;
                 chartData.labels = ['MTTR'];
-                chartData.data = [data.result.result];
-            } else if (data.metric === 'code-churn' && typeof data.result === 'object') {
-                resultContent += `<strong>Added Lines:</strong> ${data.result.added_lines || "N/A"}<br>`;
-                resultContent += `<strong>Deleted Lines:</strong> ${data.result.deleted_lines || "N/A"}<br>`;
-                resultContent += `<strong>Modified Lines:</strong> ${data.result.modified_lines || "N/A"}<br>`;
-                resultContent += `<strong>Net Change (Churn):</strong> ${data.result.result || "N/A"}<br>`;
-                resultContent += `<strong>Total Commits:</strong> ${data.result.total_commits || "N/A"}<br>`;
-                resultContent += `<strong>Commit Range:</strong> ${data.result.commit_range || "N/A"}`;
+                chartData.data = [serviceResult.result];
+            } else if (data.metric === 'code-churn' && typeof serviceResult === 'object') {
+                resultContent += `<strong>Added Lines:</strong> ${serviceResult.added_lines || "N/A"}<br>`;
+                resultContent += `<strong>Deleted Lines:</strong> ${serviceResult.deleted_lines || "N/A"}<br>`;
+                resultContent += `<strong>Modified Lines:</strong> ${serviceResult.modified_lines || "N/A"}<br>`;
+                resultContent += `<strong>Net Change (Churn):</strong> ${serviceResult.result || "N/A"}<br>`;
+                resultContent += `<strong>Total Commits:</strong> ${serviceResult.total_commits || "N/A"}<br>`;
+                resultContent += `<strong>Commit Range:</strong> ${serviceResult.commit_range || "N/A"}`;
                 chartData.labels = ['Added Lines', 'Deleted Lines', 'Modified Lines'];
-                chartData.data = [data.result.added_lines, data.result.deleted_lines, data.result.modified_lines];
+                chartData.data = [serviceResult.added_lines, serviceResult.deleted_lines, serviceResult.modified_lines];
                 chartType = 'pie';
-            } else if (data.metric === 'loc' && data.result !== undefined) {
-                resultContent += `<strong>Lines of Code:</strong> ${data.result.result}`;
+            } else if (data.metric === 'loc' && serviceResult !== undefined) {
+                resultContent += `<strong>Lines of Code:</strong> ${serviceResult.result}`;
                 chartData.labels = ['Lines of Code'];
-                chartData.data = [data.result.result];
+                chartData.data = [serviceResult.result];
             }
-
             resultContent += `</div>`;
-            resultDiv.innerHTML = resultContent;
+            resultDiv.innerHTML += resultContent;
 
-            // Display the first chart using chartCanvas1
             chartCanvas1.style.display = 'block';
             resultChart = new Chart(chartCanvas1, {
                 type: chartType,
@@ -115,8 +126,7 @@ async function  calculate() {
                     labels: chartData.labels,
                     datasets: [{
                         label: 'Metric Values (Modified)',
-                        data: chartData.data,
-                        backgroundColor: chartType === 'bar' ? '#36A2EB' : ['#36A2EB', '#FF6384', '#FFCE56'],
+                        data: chartData.data
                     }]
                 },
                 options: {
@@ -125,74 +135,79 @@ async function  calculate() {
                         legend: { position: 'top' },
                         title: { display: true, text: 'Metric Visualization (Modified)' },
                         animation: false
-                    },
-
+                    }
                 }
             });
-        })
-        .catch(error => {
-            // resultDiv.style.display = 'block';
-            // resultDiv.innerHTML = `<div class="result-box error"><strong>Error:</strong> ${error.message}</div>`;
-        })
-        .finally(() => {
-            calculateBtn.innerText = 'Calculate';
-            calculateBtn.disabled = false;
-        });
+        }
+    })
+    .catch(error => {
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML += `<div class="result-box error">
+            <strong>Error (modified):</strong> ${error.message}
+        </div>`;
+    })
+    .finally(() => {
+        calculateBtn.innerText = 'Calculate';
+        calculateBtn.disabled = false;
+    });
 
-    // Second API call (online method)
+    // --- 2) "online" API call ---
     await fetch('/analyze', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload_online)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payloadOnline)
     })
-        .then(response => response.json())
-        .then(data => {
-            // Reuse the resultDiv if necessary, or adjust as needed
+    .then(async response => {
+        if (!response.ok) {
+            const errorBody = await response.json();
+            throw new Error(errorBody.error || response.statusText);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.error) {
             resultDiv.style.display = 'block';
-            if (data.error) {
-                // resultDiv.innerHTML = `<div class="result-box error"><strong>Error:</strong> ${data.error}</div>`;
-                return;
-            }
-
+            resultDiv.innerHTML += `<div class="result-box error">
+                <strong>Error (online):</strong> ${data.error}
+            </div>`;
+        } else {
+            resultDiv.style.display = 'block';
             let resultContent = `<div class="result-box">`;
-            const repoUrl = data.repo_url ? `<a href="${data.repo_url}" target="_blank">${data.repo_url}</a>` : "N/A";
+            const repoUrl = data.repo_url
+                ? `<a href="${data.repo_url}" target="_blank">${data.repo_url}</a>`
+                : "N/A";
             resultContent += `<strong>Metric:</strong> ${data.metric || "N/A"}<br>`;
             resultContent += `<strong>Repo:</strong> ${repoUrl}<br>`;
-
-            // Prepare chart data
-            let chartData = {
-                labels: [],
-                data: []
-            };
-
-            let chartType = 'bar'; // default
-
+            
+            let chartData = { labels: [], data: [] };
+            let chartType = 'bar';
+            let serviceResult = data.result;
             if (data.metric === 'mttr') {
-                resultContent += `<strong>MTTR Hours:</strong> ${data.result.result || "N/A"}<br>`;
+                resultContent += `<strong>MTTR Hours:</strong> ${serviceResult.result || "N/A"}<br>`;
                 chartData.labels = ['MTTR'];
-                chartData.data = [data.result.result];
-            } else if (data.metric === 'code-churn' && typeof data.result === 'object') {
-                resultContent += `<strong>Added Lines:</strong> ${data.result.added_lines || "N/A"}<br>`;
-                resultContent += `<strong>Deleted Lines:</strong> ${data.result.deleted_lines || "N/A"}<br>`;
-                resultContent += `<strong>Modified Lines:</strong> ${data.result.modified_lines || "N/A"}<br>`;
-                resultContent += `<strong>Net Change (Churn):</strong> ${data.result["net_change or churn"] || "N/A"}<br>`;
-                resultContent += `<strong>Total Commits:</strong> ${data.result.total_commits || "N/A"}<br>`;
-                resultContent += `<strong>Commit Range:</strong> ${data.result.commit_range || "N/A"}`;
+                chartData.data = [serviceResult.result];
+            } else if (data.metric === 'code-churn' && typeof serviceResult === 'object') {
+                resultContent += `<strong>Added Lines:</strong> ${serviceResult.added_lines || "N/A"}<br>`;
+                resultContent += `<strong>Deleted Lines:</strong> ${serviceResult.deleted_lines || "N/A"}<br>`;
+                resultContent += `<strong>Modified Lines:</strong> ${serviceResult.modified_lines || "N/A"}<br>`;
+                resultContent += `<strong>Net Change (Churn):</strong> ${serviceResult["net_change or churn"] || "N/A"}<br>`;
+                resultContent += `<strong>Total Commits:</strong> ${serviceResult.total_commits || "N/A"}<br>`;
+                resultContent += `<strong>Commit Range:</strong> ${serviceResult.commit_range || "N/A"}`;
                 chartData.labels = ['Added Lines', 'Deleted Lines', 'Modified Lines'];
-                chartData.data = [data.result.added_lines, data.result.deleted_lines, data.result.modified_lines];
+                chartData.data = [
+                    serviceResult.added_lines,
+                    serviceResult.deleted_lines,
+                    serviceResult.modified_lines
+                ];
                 chartType = 'pie';
-            } else if (data.metric === 'loc' && data.result !== undefined) {
-                resultContent += `<strong>Lines of Code:</strong> ${data.result.result}`;
+            } else if (data.metric === 'loc' && serviceResult !== undefined) {
+                resultContent += `<strong>Lines of Code:</strong> ${serviceResult.result}`;
                 chartData.labels = ['Lines of Code'];
-                chartData.data = [data.result.result];
+                chartData.data = [serviceResult.result];
             }
-
             resultContent += `</div>`;
-            resultDiv.innerHTML = resultContent;
+            resultDiv.innerHTML += resultContent;
 
-            // Display the second chart using chartCanvas2
             chartCanvas2.style.display = 'block';
             resultChart2 = new Chart(chartCanvas2, {
                 type: chartType,
@@ -200,8 +215,7 @@ async function  calculate() {
                     labels: chartData.labels,
                     datasets: [{
                         label: 'Metric Values (Online)',
-                        data: chartData.data,
-                        backgroundColor: chartType === 'bar' ? '#4CAF50' : ['#4CAF50', '#FF5733', '#FFC300'],
+                        data: chartData.data
                     }]
                 },
                 options: {
@@ -213,15 +227,18 @@ async function  calculate() {
                     }
                 }
             });
-        })
-        .catch(error => {
-            // resultDiv.style.display = 'block';
-            // resultDiv.innerHTML = `<div class="result-box error"><strong>Error:</strong> ${error.message}</div>`;
-        })
-        .finally(() => {
-            calculateBtn.innerText = 'Calculate';
-            calculateBtn.disabled = false;
-        });
+        }
+    })
+    .catch(error => {
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML += `<div class="result-box error">
+            <strong>Error (online):</strong> ${error.message}
+        </div>`;
+    })
+    .finally(() => {
+        calculateBtn.innerText = 'Calculate';
+        calculateBtn.disabled = false;
+    });
 }
 
 function resetFields() {
@@ -229,9 +246,6 @@ function resetFields() {
     document.getElementById('metric').selectedIndex = 0;
     document.getElementById('result').style.display = 'none';
 
-    // Hide the charts and destroy them if they exist
-    const chartCanvas1 = document.getElementById('resultChart');
-    const chartCanvas2 = document.getElementById('resultChart2');
     if (resultChart) {
         resultChart.destroy();
         resultChart = null;
@@ -240,6 +254,6 @@ function resetFields() {
         resultChart2.destroy();
         resultChart2 = null;
     }
-    chartCanvas1.style.display = 'none';
-    chartCanvas2.style.display = 'none';
+    document.getElementById('resultChart').style.display = 'none';
+    document.getElementById('resultChart2').style.display = 'none';
 }
