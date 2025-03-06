@@ -1,6 +1,19 @@
 let resultChart; // Variable to hold the first chart instance
 let resultChart2; // Variable to hold the second chart instance
 
+// Toggle visibility of the numCommits input based on selected metric
+document.addEventListener('DOMContentLoaded', function() {
+    const metricDropdown = document.getElementById('metric');
+    metricDropdown.addEventListener('change', function() {
+        const numCommitsContainer = document.getElementById('numCommitsContainer');
+        if (this.value === 'code-churn') {
+            numCommitsContainer.style.display = 'block';
+        } else {
+            numCommitsContainer.style.display = 'none';
+        }
+    });
+});
+
 async function  calculate() {
     const repoUrlInput = document.getElementById('githubLink').value;
     const metric = document.getElementById('metric').value;
@@ -44,7 +57,9 @@ async function  calculate() {
     };
 
     if (metric === 'code-churn') {
-        payload.num_commits_before_latest = 10;
+        const numCommitsValue = document.getElementById('numCommits').value;
+        payload.num_commits_before_latest = numCommitsValue;
+        payload_online.num_commits_before_latest = numCommitsValue;
         document.querySelector('.charts-container > *').style.maxWidth = '100%';
     }
     else{
@@ -120,7 +135,8 @@ async function  calculate() {
                     }]
                 },
                 options: {
-                    responsive: true,
+                    responsive: false,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: { position: 'top' },
                         title: { display: true, text: 'Metric Visualization (Modified)' },
@@ -205,7 +221,9 @@ async function  calculate() {
                     }]
                 },
                 options: {
-                    responsive: true,
+
+                    responsive: false,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: { position: 'top' },
                         title: { display: true, text: 'Metric Visualization (Online)' },
