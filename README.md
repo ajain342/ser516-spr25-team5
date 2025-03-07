@@ -159,4 +159,4 @@ POST [http://localhost:5000/analyze](http://localhost:5000/analyze)
 
 - **MTTR**: Ensure the repository has issues.
 - **Code Churn**: `num_commits_before_latest` must be ≤ total commits.
-- **Port Conflicts**: Ensure ports 5000-5003 are free.
+- **Port Conflicts**: Ensure ports 5000-5003 are free. If they are not update them in the .env file to ports that are free on you system.
