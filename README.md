@@ -1,99 +1,173 @@
-# Team 5
-Jeteish
-Akshat Jain
-Srinivas Oguri
-Sarthak Avaiya
 
-# Command to build Application:
-At the root folder of the project,open terminal and run the following commands: 
-### Start all the services:
+# Project Metrics Analyzer
+
+**Team 5**
+
+- **Akshat Jain**
+- **Jeteish**
+- **Srinivas Oguri**
+- **Sarthak Avaiya**
+
+## Table of Contents
+1. [Getting Started](#getting-started)
+2. [Building the Application](#building-the-application)
+3. [Using the Application](#using-the-application)
+4. [Microservices Documentation](#testing-individual-microservices)
+5. [API Documentation](#api-documentation)
+6. [Notes](#notes)
+
+## Getting Started
+
+### Prerequisites
+- Docker and Docker Compose installed.
+
+### Run the Application
+
+#### Using the Runner Script:
+
+```bash
+./runner.sh
 ```
-    docker-compose down -v --remove-orphans
-    docker network prune
-    docker-compose build --no-cache
-    docker-compose up
+
+The application will automatically open in your default browser.
+
+#### Using Docker Compose:
+
+```bash
+docker-compose down -v --remove-orphans  
+docker network prune  
+docker-compose build --no-cache  
+docker-compose up  
 ```
-### home Page:
-```http://localhost:5000/home```
-### API link:
-```http://127.0.0.1:5000/analyze```
 
-## Request Header:
-```Content-Type : application/json```
+Access the application at: [http://localhost:5000/home](http://localhost:5000/home).
 
-## Request Body:
-``` 
+## Building the Application
+
+To rebuild all services from scratch:
+
+```bash
+docker-compose down -v --remove-orphans
+docker network prune
+docker-compose build --no-cache
+docker-compose up
+```
+
+## Using the Application
+
+1. Navigate to the home page: [http://localhost:5000/home](http://localhost:5000/home).
+2. Paste a GitHub repository URL into the input field.
+3. Select a metric from the dropdown:
+   - LOC (Lines of Code)
+   - Code Churn
+   - MTTR (Mean Time to Resolve)
+
+   **Code Churn Specific**:
+   - Enter the number of commits to analyze (must be ≤ total commits).
+
+   **MTTR Note**:
+   - Requires the repository to have issues.
+
+4. View results in two graphs:
+   - Modified: Custom implementation of the metric.
+   - Online: Baseline from existing tools.
+
+## Testing Individual Microservices
+
+### LOC Microservice
+
+**Directory**: `modules/LOC_api`
+
+```bash
+docker build --no-cache -t loc_api .
+docker run -p 5002:5002 loc_api
+```
+
+**API Endpoint**:
+
+POST [http://localhost:5002/loc](http://localhost:5002/loc)
+
+**Request Body**:
+
+```json
 {
-    "metric": "loc/code-churn/mttr",
-    "repo_url": "https://github.com/you-repo-url",
-    "method": "online/modified",
-    "num_commits_before_latest": <integer value less than total number of commits>
+  "repo_url": "https://github.com/your-repo-url",
+  "method": "online"  # or "modified"
 }
 ```
 
-# Individual microservice testing
-## Command to build and run LOC API Image:
-To run the LOC microservice individually open the terminal at ```modules/LOC_api```
-### LOC Docker image build:
-```docker build --no-cache -t loc_api .```
+### Code Churn Microservice
 
-### LOC Docker image run:
-```docker run -p 5002:5002 loc_api```
+**Directory**: `modules/CC_api`
 
-### LOC API link:
-```http://127.0.0.1:5002/loc```
-
-### Request Header:
-```Content-Type : application/json```
-
-### Request Body:
-``` 
-    {
-        "repo_url": "https://github.com/your-repo-url", 
-        "method": "online/modified",
-    }
+```bash
+docker build --no-cache -t cc_api .
+docker run -p 5001:5001 cc_api
 ```
 
-## Command to build and run CodeChurn API Image:
-To run the Code churn microservice individually open the terminal at ```modules/LOC_api```
-### CC Docker image build
-```docker build --no-cache -t cc_api .```
+**API Endpoint**:
 
-### CC Docker image run
-```docker run -p 5001:5001 cc_api```
+POST [http://localhost:5001/code-churn](http://localhost:5001/code-churn)
 
-### CC API link
-```http://127.0.0.1:5001/code-churn```
+**Request Body**:
 
-### Request Header:
-```Content-Type : application/json```
-
-### Request Body:
-``` 
-    {
-        "repo_url": "https://github.com/your-repo-url", 
-        "method": "online/modified",
-    }
+```json
+{
+  "repo_url": "https://github.com/your-repo-url",
+  "method": "online",  # or "modified"
+  "num_commits_before_latest": 10
+}
 ```
 
-## Command to build and run MTTR API Image:
-To run the MTTR microservice individually open the terminal at ```modules/LOC_api```
-### MTTR Docker image build
-```docker build --no-cache -t mttr_api .```
+### MTTR Microservice
 
-### MTTR Docker image run
-```docker run -p 5003:5003 mttr_api```
+**Directory**: `modules/MTTR_api`
 
-### MTTR API link
-```http://127.0.0.1:5003/mttr```
-
-### Request Header:
-```Content-Type : application/json```
-
-### Request Body:
-``` 
-    {
-        "repo_url": "https://github.com/your-repo-url", 
-        "method": "online/modified",
-    }
+```bash
+docker build --no-cache -t mttr_api .
+docker run -p 5003:5003 mttr_api
 ```
+
+**API Endpoint**:
+
+POST [http://localhost:5003/mttr](http://localhost:5003/mttr)
+
+**Request Body**:
+
+```json
+{
+  "repo_url": "https://github.com/your-repo-url",
+  "method": "online"  # or "modified"
+}
+```
+
+## API Documentation
+
+### Main API Endpoint:
+
+POST [http://localhost:5000/analyze](http://localhost:5000/analyze)
+
+**Headers**:
+
+```json
+{
+  "Content-Type": "application/json"
+}
+```
+
+**Request Body**:
+
+```json
+{
+  "metric": "loc",  # or "code-churn" or "mttr"
+  "repo_url": "https://github.com/your-repo-url",
+  "method": "online",  # or "modified"
+  "num_commits_before_latest": 10  # Only for code-churn
+}
+```
+
+## Notes
+
+- **MTTR**: Ensure the repository has issues.
+- **Code Churn**: `num_commits_before_latest` must be ≤ total commits.
+- **Port Conflicts**: Ensure ports 5000-5003 are free.
