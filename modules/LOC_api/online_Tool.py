@@ -17,9 +17,7 @@ def get_github_repo():
 def fetch_loc_codetabs(repo_path):
     try:
         api_url = f"https://api.codetabs.com/v1/loc/?github={repo_path}"
-        print(f"Attempting to call: {api_url}")
         response = requests.get(api_url)
-        print(f"Response status: {response.status_code}")
         response.raise_for_status()
         loc_data = response.json()
 
@@ -28,8 +26,8 @@ def fetch_loc_codetabs(repo_path):
         return {"total_lines": total_lines, "error": None}
 
     except requests.exceptions.RequestException as e:
-        print(f"Error fetching LOC data: {e}")
-        exit(1)
+        print(f"Error fetching LOC data: {str(e)}")
+        raise Exception(f"Error fetching LOC data: {str(e)}")
 
 def main():
     repo_path = get_github_repo()    
@@ -37,8 +35,8 @@ def main():
     
     if resultOnline["error"]:
         print(f"Error: {resultOnline['error']}")
-        exit(1)
-    print(f"Total LOC: {resultOnline['total_lines']}")
+    else:
+        print(f"Total LOC: {resultOnline['total_lines']}")
 
 if __name__ == "__main__":
     main()

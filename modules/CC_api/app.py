@@ -9,11 +9,13 @@ app = Flask(__name__)
 def clone_repo(repo_url):
     
     temp_dir = tempfile.mkdtemp()
-    repo = git.Repo.clone_from(repo_url, temp_dir)
+    try:
+        repo = git.Repo.clone_from(repo_url, temp_dir)
+    except Exception as e:
+        raise Exception("Failed to clone repository. Please ensure the repository is public or valid.")
     return repo, temp_dir
 
 def get_commit_count(repo):
-    
     return len(list(repo.iter_commits()))
 
 def compute_code_churn(repo, start_commit, end_commit):
@@ -45,8 +47,11 @@ def compute_code_churn(repo, start_commit, end_commit):
 def code_churn():
     data = request.get_json()
     repo_url = data.get("repo_url")
-    num_commits_before_latest = int(data.get("num_commits_before_latest", 0))
-    method = data.get("method")    
+    try:
+        num_commits_before_latest = int(data.get("num_commits_before_latest", 0))
+    except Exception:
+        return jsonify({"error": "Enter commits in number."}), 400
+    method = data.get("method")
     try:
         if method == "modified":
             if not repo_url:
@@ -55,12 +60,16 @@ def code_churn():
             repo, repo_path = clone_repo(repo_url)
             total_commits = get_commit_count(repo)
             
-            if num_commits_before_latest < 0 or num_commits_before_latest >= total_commits:
-                return jsonify({"error": "invalid number of commits before latest"}), 400
+            if total_commits >= 1000:
+                return jsonify({"error": "Too large repo, please enter a repo with less than 1000 commits."}), 400
+            
+            if num_commits_before_latest < 0:
+                return jsonify({"error": "The number of commits must be a non-negative integer."}), 400
+            if num_commits_before_latest >= total_commits:
+                return jsonify({"error": "The number of commits specified exceeds the available commits in the repository."}), 400
 
             start_commit = f"HEAD~{num_commits_before_latest}" if num_commits_before_latest > 0 else "HEAD~1"
             end_commit = "HEAD"
-
             added, deleted, modified = compute_code_churn(repo, start_commit, end_commit)
 
             repo.close()

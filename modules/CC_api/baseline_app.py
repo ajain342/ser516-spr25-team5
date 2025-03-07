@@ -4,8 +4,6 @@ import shutil
 import tempfile
 from flask import Flask, request, jsonify
 
-app = Flask(__name__)
-
 def clone_repo(repo_url):
     temp_dir = tempfile.mkdtemp()
     try:
@@ -44,15 +42,19 @@ def get_git_code_churn(repo_url, num_commits_before_latest):
     
     repo_path = clone_repo(repo_url)
     if not repo_path:
-        return jsonify({"error": "Failed to clone repository"}), 500
+        return jsonify({"error": "Failed to clone repository. Please ensure the repository is public or valid."}), 500
     
     try:
         total_commits = int(subprocess.run(["git", "rev-list", "--count", "HEAD"], cwd=repo_path, capture_output=True, text=True, check=True).stdout.strip())
         if total_commits == 0:
             return jsonify({"error": "Repository has no commits"}), 400
         
-        if num_commits_before_latest < 0 or num_commits_before_latest >= total_commits:
-            return jsonify({"error": "Invalid number of commits specified"}), 400
+        if total_commits >= 1000:
+            return jsonify({"error": "Too large repo, please enter a repo with less than 1000 commits."}), 400
+        if num_commits_before_latest < 0:
+            return jsonify({"error": "The number of commits must be a non-negative integer."}), 400
+        if num_commits_before_latest >= total_commits:
+            return jsonify({"error": "The number of commits specified exceeds the available commits in the repository."}), 400
         
         start_commit = f"HEAD~{num_commits_before_latest}" if num_commits_before_latest > 0 else "HEAD~1"
         end_commit = "HEAD"
