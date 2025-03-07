@@ -14,7 +14,10 @@ def fetch_closed_issues(repo_url):
 
         if response.status_code != 200:
             error_msg = response.json().get('message', 'Unknown error')
-            raise Exception(f"GitHub API error: {error_msg}")
+            if error_msg == "Not Found":
+                raise Exception("Unable to clone repository. Please ensure the repository is public or valid.")
+            else:
+                raise Exception(f"GitHub API error: {error_msg}")
 
         batch = response.json()
         if not batch:
@@ -51,18 +54,14 @@ def calculate_mttr(issues):
     return sum(repair_times)/len(repair_times)/3600 if repair_times else None
 
 def fetch_mttr_gitapi(repo_url):
-    try:
-        repo_url = repo_url.rstrip("/")
-        issues = fetch_closed_issues(repo_url)
-        
-        if not issues:
-            return {"mttr": None, "error": "No closed issues found"}
-        
-        mttr = calculate_mttr(issues)
-        return {"mttr": mttr, "error": None} if mttr else {"mttr": None, "error": "No issues with valid timestamps"}
+    repo_url = repo_url.rstrip("/")
+    issues = fetch_closed_issues(repo_url)
     
-    except Exception as e:
-        return {"mttr": None, "error": f"Calculation failed: {str(e)}"}
+    if not issues:
+        return {"mttr": None, "error": "No closed issues found"}
+    
+    mttr = calculate_mttr(issues)
+    return {"mttr": mttr, "error": None} if mttr else {"mttr": None, "error": "No issues with valid timestamps"}
     
 
 if __name__ == "__main__":

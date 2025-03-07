@@ -41,8 +41,11 @@ def fetch_issues(repo_url, token=None):
     while True:
         response = requests.get(api_url, headers=headers, params={"state": "closed", "per_page": 100, "page": page})
         if response.status_code != 200:
-            print("Error fetching issues:", response.json())
-            return []
+            error_msg = response.json().get('message', 'Unknown error')
+            if error_msg == "Not Found":
+                raise Exception("Unable to clone repository. Please ensure the repository is public or valid.")
+            else:
+                raise Exception(f"Error fetching issues: {error_msg}")
 
         issues = response.json()
         if not issues:
