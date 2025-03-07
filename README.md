@@ -28,6 +28,12 @@
 ```bash
 ./runner.sh
 ```
+- If you get permission error use the following commands:
+```bash
+chmod +x runner.sh #for mac devices
+icacls runner.sh /grant:r "$env:username`:(F)" #for windows devices
+```
+- and now runner script would run.  
 
 The application will automatically open in your default browser.
 
