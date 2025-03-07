@@ -27,7 +27,7 @@ def get_loc():
         return jsonify({"error": "Missing repo_url in request"}), 400
     
     repo_url = data['repo_url']
-    method = data.get('method')  # Default to cloc
+    method = data.get('method', 'modified')  # Default to cloc
 
     repo_path = parse_url(repo_url)
     if not repo_path:

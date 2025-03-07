@@ -16,15 +16,14 @@ def clone_repo(repo_url, temp_dir):
         subprocess.run(["git", "clone", repo_url, temp_dir], check=True)
     except subprocess.CalledProcessError:
         print("Failed to clone repository.")
-        exit(1)
+        raise Exception("Failed to clone repository.")
 
 def run_cloc(temp_dir):
     output_file = os.path.join(temp_dir, "cloc_output.json")
     try:
         subprocess.run(["cloc", temp_dir, "--json", f"--out={output_file}"], check=True)
     except subprocess.CalledProcessError:
-        print("Failed to run cloc.")
-        exit(1)
+        raise Exception("Failed to run cloc.")
     return output_file
 
 def compute_modified_loc(json_file):
@@ -33,7 +32,9 @@ def compute_modified_loc(json_file):
     
     modified_loc = 0
     for lang, stats in data.items():
-        if isinstance(stats, dict):  # Ensure it's not metadata
+        if lang in ["header", "SUM"]:  # Ignore metadata
+            continue
+        if isinstance(stats, dict):
             code = stats.get("code", 0)
             comments = stats.get("comment", 0)
             modified_loc += code + (comments / 2)
