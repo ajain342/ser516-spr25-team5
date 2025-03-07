@@ -87,10 +87,10 @@ def calculate_mttr(issues_with_metrics):
 
     for issue in issues_with_metrics:
         if issue.time_to_close is not None:
-            print(f"Issue #{issue.number}:")
-            print(f"  Created: {issue.created_at}")
-            print(f"  Closed:  {issue.closed_at}")
-            print(f"  Time Taken: {issue.time_to_close / 3600:.2f} hours\n")
+            # print(f"Issue #{issue.number}:")
+            # print(f"  Created: {issue.created_at}")
+            # print(f"  Closed:  {issue.closed_at}")
+            # print(f"  Time Taken: {issue.time_to_close / 3600:.2f} hours\n")
             repair_times.append(issue.time_to_close)
 
     if not repair_times:
@@ -125,7 +125,6 @@ def main():
     mttr = calculate_mttr(issues)
 
     if mttr is not None:
-        print(f"\nTotal Closed Issues: {len(issues)}")
         print(f"Mean Time to Resolve (MTTR): {mttr:.2f} hours")
     else:
         print("\nNo issues found with valid closure times.\n")

@@ -41,10 +41,10 @@ def calculate_mttr(issues):
             closed_time = datetime.strptime(issue["closed_at"], "%Y-%m-%dT%H:%M:%SZ")
             time_taken = (closed_time - created_time).total_seconds()
 
-            print(f"Issue #{issue['number']}:")
-            print(f"  Created: {created_time}")
-            print(f"  Closed:  {closed_time}")
-            print(f"  Time Taken: {time_taken / 3600:.2f} hours\n")
+            # print(f"Issue #{issue['number']}:")
+            # print(f"  Created: {created_time}")
+            # print(f"  Closed:  {closed_time}")
+            # print(f"  Time Taken: {time_taken / 3600:.2f} hours\n")
 
             repair_times.append(time_taken)
 
@@ -76,7 +76,6 @@ if __name__ == "__main__":
     mttr = calculate_mttr(issues)
 
     if mttr is not None:
-        print(f"\nTotal Closed Issues: {issue_count}")
         print(f"Mean Time to Repair (MTTR): {mttr:.2f} hours")
     else:
         print(f"No closed issues found for {repo_url}.")
