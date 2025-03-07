@@ -20,6 +20,7 @@
 
 ### Prerequisites
 - Docker and Docker Compose installed.
+- Git Bash (windows) for using runner script
 
 ### Run the Application
 
