@@ -62,11 +62,7 @@ def analyze_repo():
         )
 
         if response.status_code != 200:
-            return jsonify({
-                "error": f"Microservice error ({metric})",
-                "details": response.json()
-            }), response.status_code
-
+            return jsonify(response.json()), response.status_code
         return jsonify({
             "metric": metric,
             "repo_url": data['repo_url'],
