@@ -33,7 +33,9 @@ def compute_modified_loc(json_file):
     
     modified_loc = 0
     for lang, stats in data.items():
-        if isinstance(stats, dict):  # Ensure it's not metadata
+        if lang in ["header", "SUM"]:  # Ignore metadata
+            continue
+        if isinstance(stats, dict):
             code = stats.get("code", 0)
             comments = stats.get("comment", 0)
             modified_loc += code + (comments / 2)
