@@ -10,11 +10,10 @@
 
 ## Table of Contents
 1. [Getting Started](#getting-started)
-2. [Building the Application](#building-the-application)
-3. [Using the Application](#using-the-application)
-4. [Microservices Documentation](#testing-individual-microservices)
-5. [API Documentation](#api-documentation)
-6. [Notes](#notes)
+2. [Using the Application](#using-the-application)
+3. [Microservices Documentation](#testing-individual-microservices)
+4. [API Documentation](#api-documentation)
+5. [Notes](#notes)
 
 ## Getting Started
 
@@ -42,17 +41,6 @@ docker-compose up
 ```
 
 Access the application at: [http://localhost:5000/home](http://localhost:5000/home).
-
-## Building the Application
-
-To rebuild all services from scratch:
-
-```bash
-docker-compose down -v --remove-orphans
-docker network prune
-docker-compose build --no-cache
-docker-compose up
-```
 
 ## Using the Application
 
@@ -93,7 +81,7 @@ POST [http://localhost:5002/loc](http://localhost:5002/loc)
 ```json
 {
   "repo_url": "https://github.com/your-repo-url",
-  "method": "online"  # or "modified"
+  "method": "online"  or "modified"
 }
 ```
 
@@ -115,7 +103,7 @@ POST [http://localhost:5001/code-churn](http://localhost:5001/code-churn)
 ```json
 {
   "repo_url": "https://github.com/your-repo-url",
-  "method": "online",  # or "modified"
+  "method": "online",  or "modified"
   "num_commits_before_latest": 10
 }
 ```
@@ -138,7 +126,7 @@ POST [http://localhost:5003/mttr](http://localhost:5003/mttr)
 ```json
 {
   "repo_url": "https://github.com/your-repo-url",
-  "method": "online"  # or "modified"
+  "method": "online"  or "modified"
 }
 ```
 
