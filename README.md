@@ -7,6 +7,9 @@
 - **Jeteish**
 - **Srinivas Oguri**
 - **Sarthak Avaiya**
+- **Nathaniel Sullivan**
+- **Piyush Sharma**
+- **Suparno Chowdhury**
 
 ## Table of Contents
 1. [Getting Started](#getting-started)
@@ -14,6 +17,7 @@
 3. [Microservices Documentation](#testing-individual-microservices)
 4. [API Documentation](#api-documentation)
 5. [Notes](#notes)
+5. [Branching Strategy](#branching-strategy)
 
 ## Getting Started
 
@@ -166,3 +170,12 @@ POST [http://localhost:5000/analyze](http://localhost:5000/analyze)
 - **MTTR**: Ensure the repository has issues.
 - **Code Churn**: `num_commits_before_latest` must be ≤ total commits.
 - **Port Conflicts**: Ensure ports 5000-5003 are free. If they are not update them in the .env file to ports that are free on you system.
+
+## Branching Strategy
+Branching strategy and naming conventions:
+- We have decided to keep a main branch that is the deliverable for our project at any given time.
+- From main branch we will have devlopment branches such as p2-alpha, p2-beta that would be merging to main branch.
+- From development branch we will have feature branches for US/tasks which will be merged to development.
+- Each US will have its own feature branch with branching name as "US_18_some_description". Based on US tasks we might have task level branches.
+- Every feature branch will require two reviews before merging into development and development to main.
+- Every merge of development to main is considered as release and would have release notes. 
