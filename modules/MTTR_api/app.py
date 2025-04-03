@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from urllib.parse import urlparse
-from modified_MTTR import fetch_mttr_gitapi
-from online_tool_MTTR import fetch_mttr_online
+from .modified_MTTR import fetch_mttr_gitapi
+from .online_tool_MTTR import fetch_mttr_online
 
 app = Flask(__name__)
 
