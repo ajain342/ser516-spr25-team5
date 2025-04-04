@@ -20,6 +20,13 @@ services:
     networks:
       - analysis-network
 
+  defects-over-time:
+    build: ./modules/defects-over-time
+    ports:
+      - "${DEFECTS_PORT}:5000"
+    networks:
+      - analysis-network
+
   controller:
     build: .
     ports:
