@@ -20,6 +20,20 @@ services:
     networks:
       - analysis-network
 
+  cyclo_api:
+    build: ./modules/CYCLO_api
+    ports: 
+      - "${CYCLO_PORT}:5005"
+    networks:
+      - analysis-network
+  
+  hal_api: 
+    build: ./modules/HAL_api
+    ports:
+      - "${HAL_PORT}:5006"
+    networks:
+      - analysis-network
+
   controller:
     build: .
     ports:
