@@ -30,7 +30,7 @@ MICROSERVICES = {
         'params': ['repo_url', 'method']
     },
     'Cyclomatic Complexity': {
-        'url': 'http://mttr_api:5004/cc',
+        'url': 'http://mttr_api:5005/cc',
         'method': 'POST',
         'params': ['repo_url', 'method']
     },
@@ -40,7 +40,7 @@ MICROSERVICES = {
         'params': ['repo_url', 'method']
     },
     'Defect Tracking': {
-        'url': 'http://mttr_api:5007/dt',
+        'url': 'http://mttr_api:5004/dt',
         'method': 'POST',
         'params': ['repo_url', 'method']
     }
