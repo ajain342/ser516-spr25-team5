@@ -28,6 +28,21 @@ MICROSERVICES = {
         'url': 'http://mttr_api:5003/mttr',
         'method': 'POST',
         'params': ['repo_url', 'method']
+    },
+    'Cyclomatic Complexity': {
+        'url': 'http://mttr_api:5005/cc',
+        'method': 'POST',
+        'params': ['repo_url', 'method']
+    },
+    'Halstead Metrics': {
+        'url': 'http://mttr_api:5006/hm',
+        'method': 'POST',
+        'params': ['repo_url', 'method']
+    },
+    'Defect Tracking': {
+        'url': 'http://mttr_api:5004/dt',
+        'method': 'POST',
+        'params': ['repo_url', 'method']
     }
 }
 
