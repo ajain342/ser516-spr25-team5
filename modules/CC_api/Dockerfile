@@ -4,7 +4,8 @@ RUN apt-get update && apt-get install -y git
 
 WORKDIR /app
 
-COPY . . 
+COPY . /app 
+ENV PYTHONPATH="${PYTHONPATH}:/app/src"
 
 RUN pip install --no-cache-dir -r requirements.txt
 
