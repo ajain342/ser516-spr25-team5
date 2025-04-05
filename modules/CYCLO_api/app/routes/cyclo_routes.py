@@ -1,5 +1,6 @@
 from flask import jsonify, Blueprint, request
 from app.services.cyclo_service import get_cc
+from file_utilities.repo_utils import RepoUtils
 
 
 bp = Blueprint("cyclo", __name__)
@@ -25,8 +26,18 @@ def info():
 
 @bp.route("/run", methods=["POST"])
 def analyze_cc():
+    
     data = request.get_json()
-    code = data.get("code")
+    repo_url = data.get("repo_url")
+    if not repo_url:
+        return jsonify({"error": "Missing 'repo_url'"}), 400
+    
+    _, temp_dir = RepoUtils.clone_repo(repo_url)
+    code = RepoUtils.read_files(temp_dir)
+    
+    if not code:
+        return jsonify({"message": "No Java files found in the repository"}), 400
+
 
     if isinstance(code, dict):
         code = "\n".join(code.values())
