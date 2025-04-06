@@ -1,6 +1,8 @@
 services:
   loc_api:
     build: ./modules/LOC_api
+    volumes:
+      - ./src:/app/src
     ports:
       - "${LOC_PORT}:5002"
     networks:
