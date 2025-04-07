@@ -1,6 +1,8 @@
 services:
   loc_api:
-    build: ./modules/LOC_api
+    build:
+      context: .
+      dockerfile: ./modules/LOC_api/Dockerfile
     volumes:
       - ./src:/app/src
     ports:
@@ -9,7 +11,9 @@ services:
       - analysis-network
 
   mttr_api:
-    build: ./modules/MTTR_api
+    build:
+      context: .
+      dockerfile: ./modules/MTTR_api/Dockerfile
     volumes:
       - ./src:/app/src
     ports:
@@ -18,7 +22,9 @@ services:
       - analysis-network
 
   cc_api:
-    build: ./modules/CC_api
+    build:
+      context: .
+      dockerfile: ./modules/CC_api/Dockerfile
     volumes:
       - ./src:/app/src
     ports:
@@ -34,7 +40,9 @@ services:
       - analysis-network
 
   controller:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "${CONTROLLER_PORT}:5000"
     environment:
