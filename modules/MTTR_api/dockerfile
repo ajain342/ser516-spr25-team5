@@ -7,9 +7,13 @@ RUN apt-get update && \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /MTTR_api
+WORKDIR /app
 
 COPY requirements.txt .
+COPY . /app
+
+ENV PYTHONPATH="${PYTHONPATH}:/app/src"
+
 
 RUN pip install --no-cache-dir -r requirements.txt
 

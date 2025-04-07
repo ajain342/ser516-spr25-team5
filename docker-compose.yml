@@ -10,6 +10,8 @@ services:
 
   mttr_api:
     build: ./modules/MTTR_api
+    volumes:
+      - ./src:/app/src
     ports:
       - "${MTTR_PORT}:5003"
     networks:
