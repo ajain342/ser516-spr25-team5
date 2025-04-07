@@ -1,7 +1,8 @@
 from flask import Flask, request, jsonify
-from urllib.parse import urlparse
 from modified_MTTR import fetch_mttr_gitapi
 from online_tool_MTTR import fetch_mttr_online
+from fetch_repo import fetch_repo
+import shutil
 
 app = Flask(__name__)
 
@@ -20,17 +21,22 @@ def get_mttr():
     method = data.get('method') 
     try:
         if method == 'modified':
+            clone_result = fetch_repo(repo_url)
+            if "error" in clone_result:
+                return jsonify({"error": clone_result["error"], "repo_url": repo_url}), 400
+            temp_dir = clone_result["temp_dir"]
             result = fetch_mttr_gitapi(repo_url)
+            shutil.rmtree(temp_dir, ignore_errors=True)
+        
         elif method == 'online':
             result = fetch_mttr_online(repo_url)
+        
         else:
             return jsonify({"error": "Invalid method. Use 'online' or 'modified'"}), 400
-        if result["error"]:
-            return jsonify({
-                "error": result["error"],
-                "repo_url": repo_url
-            }), 400 if "No closed" in result["error"] else 500
-    
+        
+        if result.get("error"):
+            return jsonify({"error": result["error"], "repo_url": repo_url}), 400
+        
         return jsonify({
             "repo_url": repo_url,
             "result": round(result["mttr"], 2),
