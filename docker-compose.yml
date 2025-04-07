@@ -1,6 +1,8 @@
 services:
   loc_api:
     build: ./modules/LOC_api
+    volumes:
+      - ./src:/app/src
     ports:
       - "${LOC_PORT}:5002"
     networks:
@@ -8,6 +10,8 @@ services:
 
   mttr_api:
     build: ./modules/MTTR_api
+    volumes:
+      - ./src:/app/src
     ports:
       - "${MTTR_PORT}:5003"
     networks:
@@ -15,6 +19,8 @@ services:
 
   cc_api:
     build: ./modules/CC_api
+    volumes:
+      - ./src:/app/src
     ports:
       - "${CC_PORT}:5001"
     networks:

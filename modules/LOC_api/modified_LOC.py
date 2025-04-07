@@ -1,22 +1,7 @@
 import json
 import os
 import subprocess
-import tempfile
-import argparse
-from urllib.parse import urlparse
-
-def get_github_repo():
-    parser = argparse.ArgumentParser(description="Clone a GitHub repo and analyze LOC using cloc.")
-    parser.add_argument("repo_url", type=str, help="GitHub repository URL")
-    args = parser.parse_args()
-    return args.repo_url
-
-def clone_repo(repo_url, temp_dir):
-    try:
-        subprocess.run(["git", "clone", repo_url, temp_dir], check=True)
-    except subprocess.CalledProcessError:
-        print("Failed to clone repository.")
-        raise Exception("Failed to clone repository.")
+from src.fetch_repo import fetch_repo
 
 def run_cloc(temp_dir):
     output_file = os.path.join(temp_dir, "cloc_output.json")
@@ -32,7 +17,7 @@ def compute_modified_loc(json_file):
     
     modified_loc = 0
     for lang, stats in data.items():
-        if lang in ["header", "SUM"]:  # Ignore metadata
+        if lang in ["header", "SUM"]:
             continue
         if isinstance(stats, dict):
             code = stats.get("code", 0)
@@ -41,13 +26,10 @@ def compute_modified_loc(json_file):
     
     return modified_loc
 
-def main():
-    repo_url = get_github_repo()
-    with tempfile.TemporaryDirectory() as temp_dir:
-        clone_repo(repo_url, temp_dir)
-        json_output = run_cloc(temp_dir)
-        modified_loc = compute_modified_loc(json_output)
-        print(f"Modified LOC: {modified_loc}")
+def main(repo_url):
+    fetch_result = fetch_repo(repo_url) 
+    repo_path = fetch_result["temp_dir"]  
 
-if __name__ == "__main__":
-    main()
+    cloc_json_file = run_cloc(repo_path)
+    modified_loc = compute_modified_loc(cloc_json_file)
+    return modified_loc
