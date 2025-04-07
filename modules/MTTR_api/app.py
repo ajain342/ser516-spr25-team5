@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from modified_MTTR import fetch_mttr_gitapi
 from online_tool_MTTR import fetch_mttr_online
-from fetch_repo import fetch_repo
+from modules.fetch_repo import fetch_repo
 import shutil
 
 app = Flask(__name__)
