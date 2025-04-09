@@ -1,6 +1,10 @@
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../")))
 from flask import jsonify, Blueprint, request
 from app.services.cyclo_service import get_cc
-from modules.utilities import fetch_repo, read_java_files
+from modules.utilities.fetch_repo import fetch_repo
+from modules.utilities.read_java_files import read_files
 
 
 bp = Blueprint("cyclo", __name__)
@@ -33,7 +37,7 @@ def analyze_cc():
         return jsonify({"error": "Missing 'repo_url'"}), 400
     
     results = fetch_repo(repo_url)
-    code = read_java_files.read_files(results["temp_dir"])
+    code = read_files(results["temp_dir"])
     
     if not code:
         return jsonify({"message": "No Java files found in the repository"}), 400
