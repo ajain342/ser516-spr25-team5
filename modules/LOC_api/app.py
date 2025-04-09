@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from urllib.parse import urlparse
 from online_Tool import fetch_loc_codetabs
-from modules.fetch_repo import fetch_repo
+from modules.utilities.fetch_repo import fetch_repo
 from modified_LOC import run_cloc, compute_modified_loc
 import tempfile
 import os

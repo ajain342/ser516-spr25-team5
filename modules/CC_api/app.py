@@ -4,7 +4,7 @@ import shutil
 import tempfile
 from flask import Flask, request, jsonify
 from baseline_app import get_git_code_churn
-from modules.fetch_repo import fetch_repo  
+from modules.utilities.fetch_repo import fetch_repo  
 
 app = Flask(__name__)
 

@@ -12,7 +12,7 @@ COPY modules/CC_api/requirements.txt /app/modules/CC_api/requirements.txt
 
 RUN pip install --no-cache-dir -r /app/modules/CC_api/requirements.txt
 
-COPY ../../modules/fetch_repo.py /app/modules/fetch_repo.py
+COPY ../../modules/utilities/ /app/modules/utilities/
 COPY ../../modules/__init__.py /app/modules/__init__.py
 
 COPY modules/CC_api/. /app/modules/CC_api/

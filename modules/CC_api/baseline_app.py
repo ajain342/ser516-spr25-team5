@@ -3,7 +3,7 @@ import subprocess
 import shutil
 import tempfile
 from flask import Flask, request, jsonify
-from modules.fetch_repo import fetch_repo
+from modules.utilities.fetch_repo import fetch_repo
 
 def get_commits(repo_path, start_commit, end_commit):
     command = ["git", "log", "--format=%H", "--no-merges", f"{start_commit}..{end_commit}"]

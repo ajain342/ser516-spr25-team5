@@ -39,6 +39,24 @@ services:
     networks:
       - analysis-network
 
+  cyclo_api:
+    build:
+      context: .
+      dockerfile: ./modules/CYCLO_api/Dockerfile
+    ports: 
+      - "${CYCLO_PORT}:5005"
+    networks:
+      - analysis-network
+  
+  hal_api: 
+    build: 
+      context: .
+      dockerfile: ./modules/HAL_api/Dockerfile
+    ports:
+      - "${HAL_PORT}:5006"
+    networks:
+      - analysis-network
+
   controller:
     build:
       context: .
