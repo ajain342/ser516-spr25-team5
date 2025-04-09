@@ -28,22 +28,6 @@ jobs:
           pip install -r requirements.txt
           pytest
 
-  test-cc-api:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-          cache: "pip"
-
-      - name: Install dependencies and run tests
-        run: |
-          
-
   test-loc-api:
     runs-on: ubuntu-latest
     steps:
