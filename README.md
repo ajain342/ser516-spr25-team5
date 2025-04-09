@@ -75,11 +75,11 @@ Access the application at: [http://localhost:5000/home](http://localhost:5000/ho
 
 ### LOC Microservice
 
-**Directory**: `modules/LOC_api`
+**Directory**: `project-root`
 
 ```bash
-docker build --no-cache -t loc_api .
-docker run -p 5002:5002 loc_api
+docker build --no-cache -f modules/LOC_api/Dockerfile -t loc-test .
+docker run -p 5002:5002 loc-test
 ```
 
 **API Endpoint**:
@@ -97,11 +97,11 @@ POST [http://localhost:5002/loc](http://localhost:5002/loc)
 
 ### Code Churn Microservice
 
-**Directory**: `modules/CC_api`
+**Directory**: `project-root`
 
 ```bash
-docker build --no-cache -t cc_api .
-docker run -p 5001:5001 cc_api
+docker build --no-cache -f modules/CC_api/Dockerfile -t cc-test .
+docker run -p 5001:5001 cc-test
 ```
 
 **API Endpoint**:
@@ -120,11 +120,15 @@ POST [http://localhost:5001/code-churn](http://localhost:5001/code-churn)
 
 ### MTTR Microservice
 
-**Directory**: `modules/MTTR_api`
+**Directory**: `project-root`
 
 ```bash
-docker build --no-cache -t mttr_api .
-docker run -p 5003:5003 mttr_api
+docker build --no-cache -f modules/MTTR_api/Dockerfile -t mttr-test .
+docker run -p 5003:5003 mttr-test
+```
+**Test the service**:
+```
+python modules\MTTR_api\tests\MTTR_test.py
 ```
 
 **API Endpoint**:
