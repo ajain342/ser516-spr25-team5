@@ -1,8 +1,11 @@
 from antlr4 import *
 from antlr4.error.ErrorListener import ErrorListener
-from app.services.javaFileParsingDependencies.java_parser.JavaLexer import JavaLexer
-from app.services.javaFileParsingDependencies.java_parser.JavaParser import JavaParser
-from app.services.javaFileParsingDependencies.java_parser.JavaParserListener import JavaParserListener
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../")))
+from modules.utilities.javaFileParsingDependencies.java_parser.JavaLexer import JavaLexer
+from modules.utilities.javaFileParsingDependencies.java_parser.JavaParser import JavaParser
+from modules.utilities.javaFileParsingDependencies.java_parser.JavaParserListener import JavaParserListener
 
 
 class ParsingException(Exception):

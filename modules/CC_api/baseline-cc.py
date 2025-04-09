@@ -4,7 +4,7 @@ import argparse
 import shutil
 import tempfile
 from urllib.parse import urlparse
-from modules.fetch_repo import fetch_repo
+from modules.utilities.fetch_repo import fetch_repo
 
 def get_git_code_churn(repo_path):
     if not os.path.exists(repo_path) or not os.path.exists(os.path.join(repo_path, ".git")):

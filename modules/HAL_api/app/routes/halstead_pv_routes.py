@@ -4,7 +4,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.
 from flask import jsonify, Blueprint, request
 from app.services.halstead_pv_service import HalsteadMetrics
 from app.services.extractor import Extractor, ParsingException
-from app.services.repo_utils import RepoUtils
+from modules.utilities import fetch_repo, read_java_files
 
 bp = Blueprint("halstead_pv", __name__)
 
@@ -50,8 +50,8 @@ def calculate_halstead_metrics():
         if not repo_url:
             return jsonify({"error": "Missing 'repo_url'"}), 400
 
-        _, temp_dir = RepoUtils.clone_repo(repo_url)
-        code_files = RepoUtils.read_files(temp_dir)
+        result = fetch_repo(repo_url)
+        code_files = read_java_files.read_files(result["temp_dir"])
 
         if not code_files:
             return jsonify({"message": "No Java files found in the repository"}), 400
