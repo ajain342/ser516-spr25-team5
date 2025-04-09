@@ -60,4 +60,6 @@ jobs:
 
       - name: Install dependencies and run tests
         run: |
-          python modules/MTTR_api/tests/MTTR_test.py
+          cd modules/MTTR_api
+          pip install -r requirements.txt
+          python tests/MTTR_test.py
