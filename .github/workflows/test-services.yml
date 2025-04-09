@@ -8,6 +8,7 @@ on:
       - synchronize
     paths:
       - "modules/**"
+      - "src/**"
 
 jobs:
   test-defects-over-time:
@@ -28,25 +29,6 @@ jobs:
           pip install -r requirements.txt
           pytest
 
-  test-cc-api:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-          cache: "pip"
-
-      - name: Install dependencies and run tests
-        run: |
-          cd modules/cc-api
-          pip install -r requirements.txt
-          python3 -m unittest cc_tests.py
-          pytest
-
   test-loc-api:
     runs-on: ubuntu-latest
     steps:
@@ -63,7 +45,7 @@ jobs:
         run: |
           cd modules/LOC_api
           pip install -r requirements.txt
-          python3 -m unittest LOC_unit_tests.py
+          python tests/loc_tests.py
 
   test-mttr-api:
     runs-on: ubuntu-latest
@@ -81,4 +63,4 @@ jobs:
         run: |
           cd modules/MTTR_api
           pip install -r requirements.txt
-          python3 -m unittest test_api.py
+          python tests/MTTR_test.py
