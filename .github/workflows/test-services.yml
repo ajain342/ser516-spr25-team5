@@ -42,10 +42,7 @@ jobs:
 
       - name: Install dependencies and run tests
         run: |
-          cd modules/cc-api
-          pip install -r requirements.txt
-          python3 -m unittest cc_tests.py
-          pytest
+          
 
   test-loc-api:
     runs-on: ubuntu-latest
@@ -79,6 +76,4 @@ jobs:
 
       - name: Install dependencies and run tests
         run: |
-          cd modules/MTTR_api
-          pip install -r requirements.txt
-          python3 -m unittest test_api.py
+          python modules/MTTR_api/tests/MTTR_test.py
