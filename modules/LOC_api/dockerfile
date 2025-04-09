@@ -1,20 +1,12 @@
 FROM python:3.13
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    git \
-    cloc \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y git cloc 
+WORKDIR /app
 
-WORKDIR /LOC_api
+COPY . /app
 
-COPY requirements.txt .
+ENV PYTHONPATH="${PYTHONPATH}:/app/src"
 
 RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . .
-
-EXPOSE 5002
 
 CMD ["python", "app.py"]
