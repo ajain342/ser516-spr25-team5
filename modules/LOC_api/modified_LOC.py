@@ -1,7 +1,7 @@
 import json
 import os
 import subprocess
-from src.fetch_repo import fetch_repo
+from modules.fetch_repo import fetch_repo
 
 def run_cloc(temp_dir):
     output_file = os.path.join(temp_dir, "cloc_output.json")
