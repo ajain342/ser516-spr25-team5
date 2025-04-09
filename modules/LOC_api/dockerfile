@@ -1,20 +1,22 @@
 FROM python:3.13
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    git \
-    cloc \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y git cloc 
 
-WORKDIR /LOC_api
+ENV PYTHONPATH="/app"
+WORKDIR /app
 
-COPY requirements.txt .
+RUN mkdir -p /app/modules
+RUN mkdir -p /app/modules/LOC_api
 
-RUN pip install --no-cache-dir -r requirements.txt
+COPY modules/LOC_api/requirements.txt /app/modules/LOC_api/requirements.txt
 
-COPY . .
+RUN pip install --no-cache-dir -r /app/modules/LOC_api/requirements.txt
+
+COPY ../../modules/utilities/ /app/modules/utilities/
+COPY ../../modules/__init__.py /app/modules/__init__.py
+
+COPY modules/LOC_api/. /app/modules/LOC_api/
 
 EXPOSE 5002
 
-CMD ["python", "app.py"]
+CMD ["python", "/app/modules/LOC_api/app.py"]

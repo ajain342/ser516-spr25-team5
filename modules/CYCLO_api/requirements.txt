@@ -1,0 +1,5 @@
+pytest
+flask
+lizard
+gitdb
+GitPython

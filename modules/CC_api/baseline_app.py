@@ -3,14 +3,7 @@ import subprocess
 import shutil
 import tempfile
 from flask import Flask, request, jsonify
-
-def clone_repo(repo_url):
-    temp_dir = tempfile.mkdtemp()
-    try:
-        subprocess.run(["git", "clone", repo_url, temp_dir], check=True, capture_output=True, text=True)
-    except subprocess.CalledProcessError:
-        return None
-    return temp_dir
+from modules.utilities.fetch_repo import fetch_repo
 
 def get_commits(repo_path, start_commit, end_commit):
     command = ["git", "log", "--format=%H", "--no-merges", f"{start_commit}..{end_commit}"]
@@ -37,14 +30,16 @@ def get_loc(repo_path, commit):
     return added_lines, deleted_lines, modified_lines
 
 def get_git_code_churn(repo_url, num_commits_before_latest):
-    if not repo_url:
-        return jsonify({"error": "Missing repository URL"}), 400
-    
-    repo_path = clone_repo(repo_url)
-    if not repo_path:
-        return jsonify({"error": "Failed to clone repository. Please ensure the repository is public or valid."}), 500
-    
+    repo_path = None
     try:
+        if not repo_url:
+            return jsonify({"error": "Missing repository URL"}), 400
+        
+        fetch_result = fetch_repo(repo_url)
+        if "error" in fetch_result:
+            return jsonify({"error": fetch_result["error"]}), 400
+        
+        repo_path = fetch_result["temp_dir"]
         total_commits = int(subprocess.run(["git", "rev-list", "--count", "HEAD"], cwd=repo_path, capture_output=True, text=True, check=True).stdout.strip())
         if total_commits == 0:
             return jsonify({"error": "Repository has no commits"}), 400
@@ -78,6 +73,8 @@ def get_git_code_churn(repo_url, num_commits_before_latest):
             "total_commits": total_commits
         })
     
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
     finally:
-        if os.path.exists(repo_path):
+        if repo_path and os.path.exists(repo_path):
             shutil.rmtree(repo_path, ignore_errors=True)
