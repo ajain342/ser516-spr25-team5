@@ -8,6 +8,7 @@ on:
       - synchronize
     paths:
       - "modules/**"
+      - "src/**"
 
 jobs:
   test-defects-over-time:
@@ -44,7 +45,7 @@ jobs:
         run: |
           cd modules/LOC_api
           pip install -r requirements.txt
-          python3 -m unittest LOC_unit_tests.py
+          python tests/loc_tests.py
 
   test-mttr-api:
     runs-on: ubuntu-latest
