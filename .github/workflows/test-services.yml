@@ -1,0 +1,84 @@
+name: Services Build & Test
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+    paths:
+      - "modules/**"
+
+jobs:
+  test-defects-over-time:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install dependencies and run tests
+        run: |
+          cd modules/defects-over-time
+          pip install -r requirements.txt
+          pytest
+
+  test-cc-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install dependencies and run tests
+        run: |
+          cd modules/cc-api
+          pip install -r requirements.txt
+          python3 -m unittest cc_tests.py
+          pytest
+
+  test-loc-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install dependencies and run tests
+        run: |
+          cd modules/LOC_api
+          pip install -r requirements.txt
+          python3 -m unittest LOC_unit_tests.py
+
+  test-mttr-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install dependencies and run tests
+        run: |
+          cd modules/MTTR_api
+          pip install -r requirements.txt
+          python3 -m unittest test_api.py
