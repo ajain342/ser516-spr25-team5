@@ -1,0 +1,26 @@
+# Use the latest Python image
+FROM python:3.13
+
+# Install dependencies: git (for cloning repos), cloc (for LOC calculations), and certificates
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    git \
+    cloc \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set the working directory inside the container
+WORKDIR /ici_api
+
+# Copy dependency file and install required packages
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy all project files into the container
+COPY . .
+
+# Expose the API port
+EXPOSE 5009
+
+# Run the Flask API
+CMD ["python", "app.py"]
