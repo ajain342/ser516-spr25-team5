@@ -165,6 +165,8 @@ async function calculate() {
         <strong>Net Change (Churn):</strong> ${modifiedData.result.result || "N/A"}<br>
         <strong>Total Commits:</strong> ${modifiedData.result.total_commits || "N/A"}<br> <!-- MODIFIED -->
         <strong>Commit Range:</strong> ${modifiedData.result.commit_range || "N/A"}`;
+    } else if (metric === 'cc') {
+         modifiedOutputHTML += `<strong>CC Threshold:</strong> ${modifiedData.result.results[0].threshold || "N/A"}<br>`;
     } else if (modifiedData.metric === 'loc' && modifiedData.result !== undefined) {
         modifiedOutputHTML += `<strong>Lines of Code:</strong> ${modifiedData.result.result}`;
     }

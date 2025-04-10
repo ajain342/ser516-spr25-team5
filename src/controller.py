@@ -34,13 +34,13 @@ MICROSERVICES = {
         'method': 'POST',
         'params': ['repo_url', 'method']
     },
-    'Halstead Metrics': {
+    'hm': {
         'url': 'http://HAL_api:5006/hm',
         'method': 'POST',
         'params': ['repo_url', 'method']
     },
-    'Defect Tracking': {
-        'url': 'http://defects-over-time_api:5004/dt',
+    'dt': {
+        'url': 'http://defects-over-time:5000/dt',
         'method': 'POST',
         'params': ['repo_url', 'method']
     }
