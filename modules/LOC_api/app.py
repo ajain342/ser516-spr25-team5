@@ -1,8 +1,13 @@
 from flask import Flask, request, jsonify
 from urllib.parse import urlparse
-from modified_LOC import clone_repo, run_cloc, compute_modified_loc
 from online_Tool import fetch_loc_codetabs
+from modules.utilities.fetch_repo import fetch_repo
+from modified_LOC import run_cloc, compute_modified_loc
 import tempfile
+import os
+import json
+
+app = Flask(__name__)
 
 def parse_url(repo_url):
     parsed_url = urlparse(repo_url)
@@ -12,8 +17,6 @@ def parse_url(repo_url):
     if repo_path.count('/') != 1:
         return None
     return repo_path
-
-app = Flask(__name__)
 
 @app.route('/')
 def home():
@@ -36,9 +39,11 @@ def get_loc():
     try:
         if method == 'modified':
             with tempfile.TemporaryDirectory() as temp_dir:
-                clone_repo(repo_url, temp_dir)
-                json_output = run_cloc(temp_dir)
-                result = compute_modified_loc(json_output)
+                fetch_result = fetch_repo(repo_url)
+                cloned_path = fetch_result["temp_dir"]
+                cloc_json = run_cloc(cloned_path)
+                result = compute_modified_loc(cloc_json)
+                
         elif method == 'online':
             result = fetch_loc_codetabs(repo_path).get("total_lines", 0)
         else:

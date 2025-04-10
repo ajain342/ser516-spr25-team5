@@ -1,19 +1,12 @@
 import git
 import os
+import shutil
 import tempfile
 from flask import Flask, request, jsonify
 from baseline_app import get_git_code_churn
+from modules.utilities.fetch_repo import fetch_repo  
 
 app = Flask(__name__)
-
-def clone_repo(repo_url):
-    
-    temp_dir = tempfile.mkdtemp()
-    try:
-        repo = git.Repo.clone_from(repo_url, temp_dir)
-    except Exception as e:
-        raise Exception("Failed to clone repository. Please ensure the repository is public or valid.")
-    return repo, temp_dir
 
 def get_commit_count(repo):
     return len(list(repo.iter_commits()))
@@ -47,6 +40,7 @@ def compute_code_churn(repo, start_commit, end_commit):
 def code_churn():
     data = request.get_json()
     repo_url = data.get("repo_url")
+    repo_path = None
     try:
         num_commits_before_latest = int(data.get("num_commits_before_latest", 0))
     except Exception:
@@ -57,7 +51,12 @@ def code_churn():
             if not repo_url:
                 return jsonify({"error": "Missing 'repo_url' in request data"}), 400
 
-            repo, repo_path = clone_repo(repo_url)
+            fetch_result = fetch_repo(repo_url)
+            if "error" in fetch_result:
+                return jsonify({"error": fetch_result["error"]}), 400
+            
+            repo_path = fetch_result["temp_dir"]
+            repo = git.Repo(repo_path)
             total_commits = get_commit_count(repo)
             
             if total_commits >= 1000:
@@ -73,7 +72,8 @@ def code_churn():
             added, deleted, modified = compute_code_churn(repo, start_commit, end_commit)
 
             repo.close()
-            os.system(f"rm -rf {repo_path}")
+            if repo_path and os.path.exists(repo_path):
+                shutil.rmtree(repo_path, ignore_errors=True)
 
             return jsonify({
                 "method": method,
@@ -91,6 +91,8 @@ def code_churn():
             return jsonify({"error": "Invalid method. Use 'online' or 'modified'"}), 400
     
     except Exception as e:
+        if repo_path and os.path.exists(repo_path):
+            shutil.rmtree(repo_path, ignore_errors=True)
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':

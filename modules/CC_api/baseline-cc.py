@@ -4,17 +4,7 @@ import argparse
 import shutil
 import tempfile
 from urllib.parse import urlparse
-
-def clone_repo(repo_url):
-    temp_dir = tempfile.mkdtemp()
-    print(f"Cloning repository into temporary directory: {temp_dir}")
-    try:
-        subprocess.run(["git", "clone", repo_url, temp_dir], check=True)
-    except subprocess.CalledProcessError:
-        print("Failed to clone repository.")
-        return None
-    
-    return temp_dir
+from modules.utilities.fetch_repo import fetch_repo
 
 def get_git_code_churn(repo_path):
     if not os.path.exists(repo_path) or not os.path.exists(os.path.join(repo_path, ".git")):
@@ -90,7 +80,12 @@ def main():
         
         args = parser.parse_args()
         
-        repo_path = clone_repo(args.repo_url)
+        fetch_result = fetch_repo(args.repo_url)
+        if "error" in fetch_result:
+            print(f"Error: {fetch_result['error']}")
+            return
+            
+        repo_path = fetch_result["temp_dir"]
         if repo_path:
             get_git_code_churn(repo_path)
             if os.path.exists(repo_path):

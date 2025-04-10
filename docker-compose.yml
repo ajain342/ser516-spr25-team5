@@ -1,27 +1,66 @@
 services:
   loc_api:
-    build: ./modules/LOC_api
+    build:
+      context: .
+      dockerfile: ./modules/LOC_api/Dockerfile
+    volumes:
+      - ./src:/app/src
     ports:
       - "${LOC_PORT}:5002"
     networks:
       - analysis-network
 
   mttr_api:
-    build: ./modules/MTTR_api
+    build:
+      context: .
+      dockerfile: ./modules/MTTR_api/Dockerfile
+    volumes:
+      - ./src:/app/src
     ports:
       - "${MTTR_PORT}:5003"
     networks:
       - analysis-network
 
   cc_api:
-    build: ./modules/CC_api
+    build:
+      context: .
+      dockerfile: ./modules/CC_api/Dockerfile
+    volumes:
+      - ./src:/app/src
     ports:
       - "${CC_PORT}:5001"
     networks:
       - analysis-network
 
+  defects-over-time:
+    build: ./modules/defects-over-time
+    ports:
+      - "${DEFECTS_PORT}:5000"
+    networks:
+      - analysis-network
+
+  cyclo_api:
+    build:
+      context: .
+      dockerfile: ./modules/CYCLO_api/Dockerfile
+    ports: 
+      - "${CYCLO_PORT}:5005"
+    networks:
+      - analysis-network
+  
+  hal_api: 
+    build: 
+      context: .
+      dockerfile: ./modules/HAL_api/Dockerfile
+    ports:
+      - "${HAL_PORT}:5006"
+    networks:
+      - analysis-network
+
   controller:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "${CONTROLLER_PORT}:5000"
     environment:
