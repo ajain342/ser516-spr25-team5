@@ -10,17 +10,24 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory inside the container
-WORKDIR /ici_api
+ENV PYTHONPATH="/app"
+
+WORKDIR /app
+
+# Create necessary directories
+RUN mkdir -p /app/modules/utilities
+RUN mkdir -p /app/modules/ICI_api
 
 # Copy dependency file and install required packages
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY modules/ICI_api/requirements.txt /app/modules/ICI_api/requirements.txt
+RUN pip install --no-cache-dir -r /app/modules/ICI_api/requirements.txt
 
-# Copy all project files into the container
-COPY . .
 
-# Expose the API port
+COPY modules/utilities/ /app/modules/utilities/
+COPY modules/__init__.py /app/modules/__init__.py
+COPY modules/ICI_api/ /app/modules/ICI_api/
+
 EXPOSE 5009
 
 # Run the Flask API
-CMD ["python", "app.py"]
+CMD ["python", "/app/modules/ICI_api/app.py"]
