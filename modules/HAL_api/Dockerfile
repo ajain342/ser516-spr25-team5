@@ -11,17 +11,17 @@ ENV PYTHONPATH="/app"
 WORKDIR /app
 
 RUN mkdir -p /app/modules
-RUN mkdir -p /app/modules/MTTR_api
+RUN mkdir -p /app/modules/HAL_api
 
-COPY modules/MTTR_api/requirements.txt /app/modules/MTTR_api/requirements.txt
+COPY modules/HAL_api/requirements.txt /app/modules/HAL_api/requirements.txt
 
-RUN pip install --no-cache-dir -r /app/modules/MTTR_api/requirements.txt
+RUN pip install --no-cache-dir -r /app/modules/HAL_api/requirements.txt
 
 COPY ../../modules/utilities/ /app/modules/utilities/
 COPY ../../modules/__init__.py /app/modules/__init__.py
 
-COPY modules/MTTR_api/. /app/modules/MTTR_api/
+COPY modules/HAL_api/. /app/modules/HAL_api/
 
-EXPOSE 5003
+EXPOSE 5006
 
-CMD [ "python", "/app/modules/MTTR_api/app.py" ]
+CMD [ "python", "/app/modules/HAL_api/main.py" ]
