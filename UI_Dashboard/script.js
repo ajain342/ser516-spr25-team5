@@ -166,7 +166,63 @@ async function calculate() {
         <strong>Total Commits:</strong> ${modifiedData.result.total_commits || "N/A"}<br> <!-- MODIFIED -->
         <strong>Commit Range:</strong> ${modifiedData.result.commit_range || "N/A"}`;
     } else if (metric === 'cc') {
-         modifiedOutputHTML += `<strong>CC Threshold:</strong> ${modifiedData.result.results[0].threshold || "N/A"}<br>`;
+         const avgCC = modifiedData.result.results.find(item => item["average cyclomatic complexity"] !== undefined);
+         const averageCC = avgCC ? avgCC["average cyclomatic complexity"] : "N/A";
+
+         const totCC = modifiedData.result.results.find(item => item["total cyclomatic complexity"] !== undefined);
+         const totalCC = totCC ? totCC["total cyclomatic complexity"] : "N/A";
+
+         const functionEntries = modifiedData.result.results.filter(item => 
+            item["Cyclomatic complexity"] !== undefined && item["Function name"]
+        );
+         let maxCC = {"Cyclomatic complexity": 0, "Function name": "N/A"};
+
+         functionEntries.forEach(func => {
+            if (func["Cyclomatic complexity"] > maxCC["Cyclomatic complexity"]) {
+                maxCC = func;
+            }
+        });
+
+         modifiedOutputHTML += `<strong>Cyclomatic Complexity Average:</strong> ${averageCC}<br>`;
+         modifiedOutputHTML += `<strong>Max Cyclomatic Complexity  Value:</strong> ${maxCC["Cyclomatic complexity"]}<br>`
+         modifiedOutputHTML += `<strong>Function</strong>: ${maxCC["Function name"]}<br>`
+         modifiedOutputHTML += `<strong>Total Cyclomatic Complexity</strong>: ${totalCC}<br>`
+    } else if(metric === 'hm') {
+         const summary = modifiedData.result.file_metrics.find(item => item.Summary !== undefined);
+         const sum = summary ? summary.Summary: {};
+
+         const totalDifficulty = sum["Total Difficulty"];
+         const totalEffort = sum["Total Efforts"];
+         const totalLength = sum["Total Program Length"];
+         const totalVocab = sum["Total Program Vocabulary"];
+         const totalVolume = sum["Total Program Volume"];
+
+         modifiedOutputHTML += `<strong>Total Difficulty:</strong> ${totalDifficulty}<br>`;
+         modifiedOutputHTML += `<strong>Total Efforts:</strong> ${totalEffort}<br>`;
+         modifiedOutputHTML += `<strong>Total Program Length:</strong> ${totalLength}<br>`;
+         modifiedOutputHTML += `<strong>Total Program Vocabulary:</strong> ${totalVocab}<br>`;
+         modifiedOutputHTML += `<strong>Total Program Volume:</strong> ${totalVolume}<br>`;
+
+
+    } else if(metric === 'dt') {
+
+        const sum = modifiedData.result.summary || {};
+
+        const avg = sum["average_time_to_close"];
+        const completed_issues = sum["completed_issues"];
+        const defect_closure_30 = sum["defect_closure_rate_last_30_days"];
+        const defect_discover_30 = sum["defect_discovery_rate_last_30_days"];
+        const open_issue = sum["open_issues"];
+        const percent = sum["percent_completed"];
+        const total_issue = sum["total_issues"];
+
+        modifiedOutputHTML += `<strong>Average Time To Close:</strong> ${avg}<br>`;
+        modifiedOutputHTML += `<strong>Completed Issues:</strong> ${completed_issues}<br>`;
+        modifiedOutputHTML += `<strong>Defect Closure Rate In The Last 30 Days:</strong> ${defect_closure_30}<br>`;
+        modifiedOutputHTML += `<strong>Defect Closure Discovery Rate In Last 30 Days:</strong> ${defect_discover_30}<br>`;
+        modifiedOutputHTML += `<strong>Open Issues:</strong> ${open_issue}<br>`;
+        modifiedOutputHTML += `<strong>Percent Completed:</strong> ${percent}<br>`;
+        modifiedOutputHTML += `<strong>Total Issues:</strong> ${total_issue}<br>`;
     } else if (modifiedData.metric === 'loc' && modifiedData.result !== undefined) {
         modifiedOutputHTML += `<strong>Lines of Code:</strong> ${modifiedData.result.result}`;
     }

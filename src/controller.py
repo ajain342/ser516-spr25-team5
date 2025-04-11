@@ -40,7 +40,7 @@ MICROSERVICES = {
         'params': ['repo_url', 'method']
     },
     'dt': {
-        'url': 'http://defects-over-time:5000/dt',
+        'url': 'http://defects-over-time:5004/dt',
         'method': 'POST',
         'params': ['repo_url', 'method']
     }
