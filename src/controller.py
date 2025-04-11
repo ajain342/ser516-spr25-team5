@@ -30,19 +30,24 @@ MICROSERVICES = {
         'params': ['repo_url', 'method']
     },
     'Cyclomatic Complexity': {
-        'url': 'http://mttr_api:5005/cc',
+        'url': 'http://cyclo_api:5005/cc',  # Fixed service URL
         'method': 'POST',
         'params': ['repo_url', 'method']
     },
     'Halstead Metrics': {
-        'url': 'http://mttr_api:5006/hm',
+        'url': 'http://hal_api:5006/hm',  # Fixed service URL
         'method': 'POST',
         'params': ['repo_url', 'method']
     },
     'Defect Tracking': {
-        'url': 'http://mttr_api:5004/dt',
+        'url': 'http://defects-over-time:5000/dt',  # Fixed service URL
         'method': 'POST',
         'params': ['repo_url', 'method']
+    },
+    'Infrastructure Cost Index': {  # Added ICI API
+        'url': 'http://ici_api:5009/ici',
+        'method': 'POST',
+        'params': ['repo_url']
     }
 }
 
