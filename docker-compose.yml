@@ -57,6 +57,15 @@ services:
     networks:
       - analysis-network
 
+  ici_api:  # Adding the ICI API Service
+    build:
+      context: .
+      dockerfile: ./modules/ICI_api/Dockerfile
+    ports:
+      - "${ICI_PORT}:5009"
+    networks:
+      - analysis-network
+
   controller:
     build:
       context: .
@@ -72,6 +81,7 @@ services:
       - loc_api
       - mttr_api
       - cc_api
+      - ici_api  # Ensure the controller depends on ici_api
     networks:
       - analysis-network
 
