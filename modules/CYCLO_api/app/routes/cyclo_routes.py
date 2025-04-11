@@ -28,7 +28,7 @@ def info():
                 }
     }), 200
 
-@bp.route("/run", methods=["POST"])
+@bp.route("/cc", methods=["POST"])
 def analyze_cc():
     
     data = request.get_json()
@@ -49,7 +49,7 @@ def analyze_cc():
         results = get_cc(code)
 
 
-        return jsonify({"results": results}), 200
+        return jsonify({"method":"modified", "results": results}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

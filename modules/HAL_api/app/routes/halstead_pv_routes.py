@@ -43,7 +43,7 @@ def info():
 
 
 
-@bp.route("/run", methods=["POST"])
+@bp.route("/hm", methods=["POST"])
 def calculate_halstead_metrics():
     try:
         data = request.get_json()
