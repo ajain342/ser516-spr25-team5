@@ -2,7 +2,9 @@ from flask import Flask, request, jsonify
 from modified_MTTR import fetch_mttr_gitapi
 from online_tool_MTTR import fetch_mttr_online
 from modules.utilities.fetch_repo import fetch_repo
-import shutil
+from modules.utilities.cache import MetricCache
+
+cache = MetricCache()
 
 app = Flask(__name__)
 
@@ -21,13 +23,19 @@ def get_mttr():
     method = data.get('method') 
     try:
         if method == 'modified':
-            clone_result = fetch_repo(repo_url)
-            if "error" in clone_result:
-                return jsonify({"error": clone_result["error"], "repo_url": repo_url}), 400
-            temp_dir = clone_result["temp_dir"]
-            result = fetch_mttr_gitapi(repo_url)
-            shutil.rmtree(temp_dir, ignore_errors=True)
-        
+            fetch_result = fetch_repo(repo_url)
+            if isinstance(fetch_result, dict) and "error" in fetch_result:
+                return jsonify({"error": fetch_result["error"]}), 400
+
+            head_sha, _ = fetch_result
+            cache_key = f"{repo_url}|{head_sha}"
+
+            if cache.contains(cache_key):
+                result = cache.get(cache_key)
+            else:
+                result = fetch_mttr_gitapi(repo_url)
+                cache.add(cache_key, result)
+
         elif method == 'online':
             result = fetch_mttr_online(repo_url)
         
