@@ -99,10 +99,7 @@ async function calculate() {
     } else {
         document.querySelector('.charts-container > *').style.maxWidth = '50%';
     }
-    if (metric === 'Cyclomatic Complexity') {
-        // Integrate cc payload here.
-        console.log("Spongebobg");
-    }
+
 
     // Get canvas elements for charts
     const chartCanvas1 = document.getElementById('resultChart');
