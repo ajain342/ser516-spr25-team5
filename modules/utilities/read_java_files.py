@@ -5,10 +5,10 @@ from java_file_parser import JavaFileParser
 import config
 
 
-def read_files(temp_dir):
-    if os.path.isdir(temp_dir):
+def read_files(repo_dir):
+    if os.path.isdir(repo_dir):
         file_contents = {}
-        for root, _, files in os.walk(temp_dir):
+        for root, _, files in os.walk(repo_dir):
             for file_name in files:
                 full_path = os.path.join(root, file_name)
                 if JavaFileParser.is_valid(full_path):

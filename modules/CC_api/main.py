@@ -1,12 +1,5 @@
+from modules.utilities.fetch_repo import fetch_repo
 import git
-import os
-import tempfile
-
-def clone_repo(repo_url):
-    
-    temp_dir = tempfile.mkdtemp()
-    repo = git.Repo.clone_from(repo_url, temp_dir)
-    return repo, temp_dir
 
 def get_commit_count(repo):
     
@@ -30,19 +23,23 @@ def compute_code_churn(repo, start_commit, end_commit):
                     added_lines += added
                 if deleted > 0:
                     deleted_lines += deleted
-                
                 if added > 0 and deleted > 0:
                     modified_lines += min(added, deleted)
             except ValueError:
-                continue  
+                continue
 
     return added_lines, deleted_lines, modified_lines
 
 def main():
     repo_url = input("GitHub repo URL: ").strip()
-    repo, repo_path = clone_repo(repo_url)
 
-    
+    fetch_result = fetch_repo(repo_url)
+    if "error" in fetch_result:
+        return
+
+    repo_path = fetch_result["repo_dir"]
+    repo = git.Repo(repo_path)
+
     total_commits = get_commit_count(repo)
     print(f"\nTotal commits: {total_commits}")
 
@@ -71,9 +68,6 @@ def main():
     print(f"Total Modified Lines: {modified}")
     print(f"Net Change (Total Churn): {added + deleted}")
 
-    
-    repo.close()
-    os.system(f"rm -rf {repo_path}")
 
 if __name__ == "__main__":
     main()
