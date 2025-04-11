@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
-from modified_MTTR import fetch_mttr_gitapi
-from online_tool_MTTR import fetch_mttr_online
+from modules.MTTR_api.modified_MTTR import fetch_mttr_gitapi
+from modules.MTTR_api.online_tool_MTTR import fetch_mttr_online
 from modules.utilities.fetch_repo import fetch_repo
 from modules.utilities.cache import MetricCache
 
