@@ -1,12 +1,11 @@
-import git
-import os
-import shutil
-import tempfile
 from flask import Flask, request, jsonify
 from baseline_app import get_git_code_churn
-from modules.utilities.fetch_repo import fetch_repo  
+from modules.utilities.fetch_repo import fetch_repo
+from modules.utilities.cache import MetricCache
+import git
 
 app = Flask(__name__)
+cache = MetricCache()
 
 def get_commit_count(repo):
     return len(list(repo.iter_commits()))
@@ -40,28 +39,26 @@ def compute_code_churn(repo, start_commit, end_commit):
 def code_churn():
     data = request.get_json()
     repo_url = data.get("repo_url")
-    repo_path = None
+
     try:
         num_commits_before_latest = int(data.get("num_commits_before_latest", 0))
     except Exception:
         return jsonify({"error": "Enter commits in number."}), 400
+
     method = data.get("method")
+
     try:
         if method == "modified":
             if not repo_url:
                 return jsonify({"error": "Missing 'repo_url' in request data"}), 400
 
-            fetch_result = fetch_repo(repo_url)
-            if "error" in fetch_result:
-                return jsonify({"error": fetch_result["error"]}), 400
-            
-            repo_path = fetch_result["temp_dir"]
+            head_sha, repo_path = fetch_repo(repo_url)
+
             repo = git.Repo(repo_path)
             total_commits = get_commit_count(repo)
-            
+
             if total_commits >= 1000:
                 return jsonify({"error": "Too large repo, please enter a repo with less than 1000 commits."}), 400
-            
             if num_commits_before_latest < 0:
                 return jsonify({"error": "The number of commits must be a non-negative integer."}), 400
             if num_commits_before_latest >= total_commits:
@@ -69,30 +66,33 @@ def code_churn():
 
             start_commit = f"HEAD~{num_commits_before_latest}" if num_commits_before_latest > 0 else "HEAD~1"
             end_commit = "HEAD"
-            added, deleted, modified = compute_code_churn(repo, start_commit, end_commit)
+            cache_key = f"{repo_url}|{head_sha}|{start_commit}|{end_commit}"
+
+            if cache.contains(cache_key):
+                result = cache.get(cache_key)
+            else:
+                added, deleted, modified = compute_code_churn(repo, start_commit, end_commit)
+                result = {
+                    "method": method,
+                    "total_commits": total_commits,
+                    "commit_range": f"{start_commit} to {end_commit}",
+                    "added_lines": added,
+                    "deleted_lines": deleted,
+                    "modified_lines": modified,
+                    "result": added + deleted + modified
+                }
+                cache.add(cache_key, result)
 
             repo.close()
-            if repo_path and os.path.exists(repo_path):
-                shutil.rmtree(repo_path, ignore_errors=True)
+            return jsonify(result)
 
-            return jsonify({
-                "method": method,
-                "total_commits": total_commits,
-                "commit_range": f"{start_commit} to {end_commit}",
-                "added_lines": added,
-                "deleted_lines": deleted,
-                "modified_lines": modified,
-                "result": added + deleted + modified
-            })
-        
         elif method == "online":
-            return (get_git_code_churn(repo_url, num_commits_before_latest))
+            return get_git_code_churn(repo_url, num_commits_before_latest)
+
         else:
             return jsonify({"error": "Invalid method. Use 'online' or 'modified'"}), 400
-    
+
     except Exception as e:
-        if repo_path and os.path.exists(repo_path):
-            shutil.rmtree(repo_path, ignore_errors=True)
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':

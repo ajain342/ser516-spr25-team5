@@ -3,10 +3,10 @@ import os
 import subprocess
 from modules.utilities.fetch_repo import fetch_repo
 
-def run_cloc(temp_dir):
-    output_file = os.path.join(temp_dir, "cloc_output.json")
+def run_cloc(repo_dir):
+    output_file = os.path.join(repo_dir, "cloc_output.json")
     try:
-        subprocess.run(["cloc", temp_dir, "--json", f"--out={output_file}"], check=True)
+        subprocess.run(["cloc", repo_dir, "--json", f"--out={output_file}"], check=True)
     except subprocess.CalledProcessError:
         raise Exception("Failed to run cloc.")
     return output_file
@@ -28,7 +28,7 @@ def compute_modified_loc(json_file):
 
 def main(repo_url):
     fetch_result = fetch_repo(repo_url) 
-    repo_path = fetch_result["temp_dir"]  
+    repo_path = fetch_result["repo_dir"]  
 
     cloc_json_file = run_cloc(repo_path)
     modified_loc = compute_modified_loc(cloc_json_file)
