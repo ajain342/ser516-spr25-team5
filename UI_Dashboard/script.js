@@ -23,9 +23,9 @@ function showError(errorMsg) {
     document.getElementById('resultChart2').style.display = 'none';
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const metricDropdown = document.getElementById('metric');
-    metricDropdown.addEventListener('change', function() {
+    metricDropdown.addEventListener('change', function () {
         const numCommitsContainer = document.getElementById('numCommitsContainer');
         if (this.value === 'code-churn') {
             numCommitsContainer.style.display = 'block';
@@ -52,6 +52,7 @@ async function calculate() {
         resultChart2.destroy();
         resultChart2 = null;
     }
+
 
     // Basic validation for empty input
     if (!repoUrlInput) {
@@ -105,6 +106,7 @@ async function calculate() {
     const chartCanvas1 = document.getElementById('resultChart');
     const chartCanvas2 = document.getElementById('resultChart2');
 
+
     let apiError = null;
     let modifiedData = null;
     let onlineData = null;
@@ -118,35 +120,37 @@ async function calculate() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            apiError = mapErrorMessage(data.error);
-            throw new Error(apiError);
-        }
-        // NEW: Check for too large repo (< 1000 commits) using nested total_commits
-        if (metric === 'code-churn' && data.result.total_commits >= 1000) { // MODIFIED
-            apiError = "Too large repo, please enter a repo with less than 1000 commits.";
-            throw new Error(apiError);
-        }
-        // NEW: Check if entered commit count exceeds available commits using nested total_commits
-        if (metric === 'code-churn' && numCommitsValue >= data.result.total_commits) { // MODIFIED
-            apiError = "The number of commits specified exceeds the available commits in the repository.";
-            throw new Error(apiError);
-        }
-        modifiedData = data;
-    })
-    .catch(error => {
-        if (!apiError) {
-            apiError = error.message;
-        }
-        showError(apiError);
-    })
-    .finally(() => {
-        calculateBtn.innerText = 'Calculate';
-        calculateBtn.disabled = false;
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                apiError = mapErrorMessage(data.error);
+                throw new Error(apiError);
+            }
+            // NEW: Check for too large repo (< 1000 commits) using nested total_commits
+            if (metric === 'code-churn' && data.result.total_commits >= 1000) { // MODIFIED
+                apiError = "Too large repo, please enter a repo with less than 1000 commits.";
+                throw new Error(apiError);
+            }
+            // NEW: Check if entered commit count exceeds available commits using nested total_commits
+            if (metric === 'code-churn' && numCommitsValue >= data.result.total_commits) { // MODIFIED
+                apiError = "The number of commits specified exceeds the available commits in the repository.";
+                throw new Error(apiError);
+            }
+            modifiedData = data;
+        })
+        .catch(error => {
+            if (!apiError) {
+                apiError = error.message;
+            }
+            showError(apiError);
+        })
+        .finally(() => {
+            calculateBtn.innerText = 'Calculate';
+            calculateBtn.disabled = false;
+        });
     if (apiError) return;
+
+    let combinedHTML = '';
 
     // Build Modified method text output
     modifiedOutputHTML = `<div class="result-box">
@@ -163,45 +167,45 @@ async function calculate() {
         <strong>Total Commits:</strong> ${modifiedData.result.total_commits || "N/A"}<br> <!-- MODIFIED -->
         <strong>Commit Range:</strong> ${modifiedData.result.commit_range || "N/A"}`;
     } else if (metric === 'cc') {
-         const avgCC = modifiedData.result.results.find(item => item["average cyclomatic complexity"] !== undefined);
-         const averageCC = avgCC ? avgCC["average cyclomatic complexity"] : "N/A";
+        const avgCC = modifiedData.result.results.find(item => item["average cyclomatic complexity"] !== undefined);
+        const averageCC = avgCC ? avgCC["average cyclomatic complexity"] : "N/A";
 
-         const totCC = modifiedData.result.results.find(item => item["total cyclomatic complexity"] !== undefined);
-         const totalCC = totCC ? totCC["total cyclomatic complexity"] : "N/A";
+        const totCC = modifiedData.result.results.find(item => item["total cyclomatic complexity"] !== undefined);
+        const totalCC = totCC ? totCC["total cyclomatic complexity"] : "N/A";
 
-         const functionEntries = modifiedData.result.results.filter(item => 
+        const functionEntries = modifiedData.result.results.filter(item =>
             item["Cyclomatic complexity"] !== undefined && item["Function name"]
         );
-         let maxCC = {"Cyclomatic complexity": 0, "Function name": "N/A"};
+        let maxCC = { "Cyclomatic complexity": 0, "Function name": "N/A" };
 
-         functionEntries.forEach(func => {
+        functionEntries.forEach(func => {
             if (func["Cyclomatic complexity"] > maxCC["Cyclomatic complexity"]) {
                 maxCC = func;
             }
         });
 
-         modifiedOutputHTML += `<strong>Cyclomatic Complexity Average:</strong> ${averageCC}<br>`;
-         modifiedOutputHTML += `<strong>Max Cyclomatic Complexity  Value:</strong> ${maxCC["Cyclomatic complexity"]}<br>`
-         modifiedOutputHTML += `<strong>Function</strong>: ${maxCC["Function name"]}<br>`
-         modifiedOutputHTML += `<strong>Total Cyclomatic Complexity</strong>: ${totalCC}<br>`
-    } else if(metric === 'hm') {
-         const summary = modifiedData.result.file_metrics.find(item => item.Summary !== undefined);
-         const sum = summary ? summary.Summary: {};
+        modifiedOutputHTML += `<strong>Cyclomatic Complexity Average:</strong> ${averageCC}<br>`;
+        modifiedOutputHTML += `<strong>Max Cyclomatic Complexity  Value:</strong> ${maxCC["Cyclomatic complexity"]}<br>`
+        modifiedOutputHTML += `<strong>Function</strong>: ${maxCC["Function name"]}<br>`
+        modifiedOutputHTML += `<strong>Total Cyclomatic Complexity</strong>: ${totalCC}<br>`
+    } else if (metric === 'hm') {
+        const summary = modifiedData.result.file_metrics.find(item => item.Summary !== undefined);
+        const sum = summary ? summary.Summary : {};
 
-         const totalDifficulty = sum["Total Difficulty"];
-         const totalEffort = sum["Total Efforts"];
-         const totalLength = sum["Total Program Length"];
-         const totalVocab = sum["Total Program Vocabulary"];
-         const totalVolume = sum["Total Program Volume"];
+        const totalDifficulty = sum["Total Difficulty"];
+        const totalEffort = sum["Total Efforts"];
+        const totalLength = sum["Total Program Length"];
+        const totalVocab = sum["Total Program Vocabulary"];
+        const totalVolume = sum["Total Program Volume"];
 
-         modifiedOutputHTML += `<strong>Total Difficulty:</strong> ${totalDifficulty}<br>`;
-         modifiedOutputHTML += `<strong>Total Efforts:</strong> ${totalEffort}<br>`;
-         modifiedOutputHTML += `<strong>Total Program Length:</strong> ${totalLength}<br>`;
-         modifiedOutputHTML += `<strong>Total Program Vocabulary:</strong> ${totalVocab}<br>`;
-         modifiedOutputHTML += `<strong>Total Program Volume:</strong> ${totalVolume}<br>`;
+        modifiedOutputHTML += `<strong>Total Difficulty:</strong> ${totalDifficulty}<br>`;
+        modifiedOutputHTML += `<strong>Total Efforts:</strong> ${totalEffort}<br>`;
+        modifiedOutputHTML += `<strong>Total Program Length:</strong> ${totalLength}<br>`;
+        modifiedOutputHTML += `<strong>Total Program Vocabulary:</strong> ${totalVocab}<br>`;
+        modifiedOutputHTML += `<strong>Total Program Volume:</strong> ${totalVolume}<br>`;
 
 
-    } else if(metric === 'dt') {
+    } else if (metric === 'dt') {
 
         const sum = modifiedData.result.summary || {};
 
@@ -224,6 +228,7 @@ async function calculate() {
         modifiedOutputHTML += `<strong>Lines of Code:</strong> ${modifiedData.result.result}`;
     }
     modifiedOutputHTML += `</div>`;
+    combinedHTML += modifiedOutputHTML;
 
     // Second API call (Online method)
     await fetch('/analyze', {
@@ -231,53 +236,65 @@ async function calculate() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload_online)
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            apiError = mapErrorMessage(data.error);
-            throw new Error(apiError);
-        }
-        onlineData = data;
-    })
-    .catch(error => {
-        if (!apiError) {
-            showError(error.message);
-        }
-    })
-    .finally(() => {
-        calculateBtn.innerText = 'Calculate';
-        calculateBtn.disabled = false;
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                apiError = mapErrorMessage(data.error);
+                throw new Error(apiError);
+            }
+            onlineData = data;
+        })
+        .catch(error => {
+            if (!apiError) {
+                showError(error.message);
+            }
+        })
+        .finally(() => {
+            calculateBtn.innerText = 'Calculate';
+            calculateBtn.disabled = false;
+        });
     if (apiError) return;
 
-    // Build Online method text output
-    onlineOutputHTML = `<div class="result-box">
-        <h3>Online Output</h3>
-        <strong>Metric:</strong> ${onlineData.metric || "N/A"}<br>
-        <strong>Repo:</strong> ${onlineData.repo_url ? `<a href="${onlineData.repo_url}" target="_blank">${onlineData.repo_url}</a>` : "N/A"}<br>`;
-    if (onlineData.metric === 'mttr') {
-        onlineOutputHTML += `<strong>MTTR Hours:</strong> ${onlineData.result.result || "N/A"}<br>`;
-    } else if (onlineData.metric === 'code-churn' && typeof onlineData.result === 'object') {
-        onlineOutputHTML += `<strong>Added Lines:</strong> ${onlineData.result.added_lines || "N/A"}<br>
-        <strong>Deleted Lines:</strong> ${onlineData.result.deleted_lines || "N/A"}<br>
-        <strong>Modified Lines:</strong> ${onlineData.result.modified_lines || "N/A"}<br>
-        <strong>Net Change (Churn):</strong> ${onlineData.result.result || "N/A"}<br>
-        <strong>Total Commits:</strong> ${onlineData.result.total_commits || "N/A"}<br> <!-- MODIFIED -->
-        <strong>Commit Range:</strong> ${onlineData.result.commit_range || "N/A"}`;
-    } else if (onlineData.metric === 'loc' && onlineData.result !== undefined) {
-        onlineOutputHTML += `<strong>Lines of Code:</strong> ${onlineData.result.result}`;
+
+    if (onlineData.metric === "mttr" || onlineData.metric === "loc" || onlineData.metric === "code-churn") {
+        // Build Online method text output
+        onlineOutputHTML = `<div class="result-box">
+            <h3>Online Output</h3>
+            <strong>Metric:</strong> ${onlineData.metric || "N/A"}<br>
+            <strong>Repo:</strong> ${onlineData.repo_url ? `<a href="${onlineData.repo_url}" target="_blank">${onlineData.repo_url}</a>` : "N/A"}<br>`;
+        if (onlineData.metric === 'mttr') {
+            onlineOutputHTML += `<strong>MTTR Hours:</strong> ${onlineData.result.result || "N/A"}<br>`;
+        } else if (onlineData.metric === 'code-churn' && typeof onlineData.result === 'object') {
+            onlineOutputHTML += `<strong>Added Lines:</strong> ${onlineData.result.added_lines || "N/A"}<br>
+            <strong>Deleted Lines:</strong> ${onlineData.result.deleted_lines || "N/A"}<br>
+            <strong>Modified Lines:</strong> ${onlineData.result.modified_lines || "N/A"}<br>
+            <strong>Net Change (Churn):</strong> ${onlineData.result.result || "N/A"}<br>
+            <strong>Total Commits:</strong> ${onlineData.result.total_commits || "N/A"}<br> <!-- MODIFIED -->
+            <strong>Commit Range:</strong> ${onlineData.result.commit_range || "N/A"}`;
+        } else if (onlineData.metric === 'loc' && onlineData.result !== undefined) {
+            onlineOutputHTML += `<strong>Lines of Code:</strong> ${onlineData.result.result}`;
+        }
+        onlineOutputHTML += `</div>`;
+
+        combinedHTML += onlineOutputHTML;
+
     }
-    onlineOutputHTML += `</div>`;
 
-    // Combine both outputs side by side
     resultDiv.style.display = 'block';
-    resultDiv.innerHTML = `<div class="result-container" style="display: flex; gap:20px;">` +
-                           modifiedOutputHTML + onlineOutputHTML +
-                           `</div>`;
 
-    // Render Modified chart
+
+    resultDiv.innerHTML = `<div class="result-container" style="display: flex; gap:20px;">${combinedHTML}</div>`;
+    resultDiv.style.display = 'block';
+
+
+
+
+
+    chartCanvas1.style.display = 'block';
+
     let chartData = { labels: [], data: [] };
     let chartType = 'bar';
+
     if (modifiedData.metric === 'mttr') {
         chartData.labels = ['MTTR'];
         chartData.data = [modifiedData.result.result];
@@ -288,6 +305,30 @@ async function calculate() {
     } else if (modifiedData.metric === 'loc') {
         chartData.labels = ['Lines of Code'];
         chartData.data = [modifiedData.result.result];
+    } else if (modifiedData.metric === 'cc' && Array.isArray(modifiedData.result.results)) {
+        document.getElementById('resultChart2').style.display = 'none';
+        chartData.labels = [];
+        chartData.data = [];
+        modifiedData.result.results.forEach(item => {
+            if (item["Function name"] && item["Cyclomatic complexity"] !== undefined) {
+                chartData.labels.push(item["Function name"]);
+                chartData.data.push(item["Cyclomatic complexity"]);
+            }
+        });
+    } else if (modifiedData.metric === 'hm') {
+        document.getElementById('resultChart2').style.display = 'none';
+        const summary = modifiedData.result.file_metrics.find(item => item.Summary !== undefined);
+        const sum = summary ? summary.Summary : {};
+        const totalDifficulty = sum["Total Difficulty"];
+        chartData.labels = ['Total Difficulty'];
+        chartData.data = [totalDifficulty];
+    } else if (modifiedData.metric === 'dt') {
+        document.getElementById('resultChart2').style.display = 'none';
+        const sum = modifiedData.result.summary || {};
+        const percent = sum["percent_completed"];
+        chartData.labels = ['Completed', 'Incomplete'];
+        chartData.data = [percent, 100 - percent];
+        chartType = 'pie';
     }
     chartCanvas1.style.display = 'block';
     resultChart = new Chart(chartCanvas1, {
@@ -313,43 +354,50 @@ async function calculate() {
         }
     });
 
+
     // Render Online chart
-    chartData = { labels: [], data: [] };
-    chartType = 'bar';
-    if (onlineData.metric === 'mttr') {
-        chartData.labels = ['MTTR'];
-        chartData.data = [onlineData.result.result];
-    } else if (onlineData.metric === 'code-churn' && typeof onlineData.result === 'object') {
-        chartData.labels = ['Added Lines', 'Deleted Lines', 'Modified Lines'];
-        chartData.data = [onlineData.result.added_lines, onlineData.result.deleted_lines, onlineData.result.modified_lines];
-        chartType = 'pie';
-    } else if (onlineData.metric === 'loc') {
-        chartData.labels = ['Lines of Code'];
-        chartData.data = [onlineData.result.result];
-    }
-    chartCanvas2.style.display = 'block';
-    resultChart2 = new Chart(chartCanvas2, {
-        type: chartType,
-        data: {
-            labels: chartData.labels,
-            datasets: [{
-                label: 'Metric Values (Online)',
-                data: chartData.data,
-                backgroundColor: chartType === 'bar'
-                    ? '#4CAF50'
-                    : ['#4CAF50', '#FF5733', '#FFC300'],
-            }]
-        },
-        options: {
-            responsive: false,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'top' },
-                title: { display: true, text: 'Metric Visualization (Online)' },
-                animation: false
-            }
+
+    if (onlineData.metric !== "cc" && onlineData.metric !== "hm" && onlineData.metric !== "dt") {
+
+        chartData = { labels: [], data: [] };
+        chartType = 'bar';
+        if (onlineData.metric === 'mttr') {
+            chartData.labels = ['MTTR'];
+            chartData.data = [onlineData.result.result];
+        } else if (onlineData.metric === 'code-churn' && typeof onlineData.result === 'object') {
+            chartData.labels = ['Added Lines', 'Deleted Lines', 'Modified Lines'];
+            chartData.data = [onlineData.result.added_lines, onlineData.result.deleted_lines, onlineData.result.modified_lines];
+            chartType = 'pie';
+        } else if (onlineData.metric === 'loc') {
+            chartData.labels = ['Lines of Code'];
+            chartData.data = [onlineData.result.result];
         }
-    });
+        chartCanvas2.style.display = 'block';
+        resultChart2 = new Chart(chartCanvas2, {
+            type: chartType,
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Metric Values (Online)',
+                    data: chartData.data,
+                    backgroundColor: chartType === 'bar'
+                        ? '#4CAF50'
+                        : ['#4CAF50', '#FF5733', '#FFC300'],
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Metric Visualization (Online)' },
+                    animation: false
+                }
+            }
+        });
+
+    }
+
 }
 
 function resetFields() {
