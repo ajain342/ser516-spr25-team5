@@ -1,3 +1,6 @@
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../")))
 from flask import jsonify, Blueprint, request
 from app.services.cyclo_service import get_cc
 from modules.utilities.fetch_repo import fetch_repo

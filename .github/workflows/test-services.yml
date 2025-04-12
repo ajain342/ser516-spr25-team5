@@ -64,3 +64,40 @@ jobs:
           cd modules/MTTR_api
           pip install -r requirements.txt
           python tests/MTTR_test.py
+  
+  test-hal-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+      
+      - name: Install dependencies and run tests
+        run: |
+          cd modules/HAL_api
+          pip install -r requirements.txt
+          pytest
+          
+  test-cyclo-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+      
+      - name: Install dependencies and run tests
+        run: |
+          cd modules/CYCLO_api
+          pip install -r requirements.txt
+          pytest
+    

@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify
 from urllib.parse import urlparse
-from online_Tool import fetch_loc_codetabs
+from modules.LOC_api.online_Tool import fetch_loc_codetabs
 from modules.utilities.fetch_repo import fetch_repo
-from modified_LOC import run_cloc, compute_modified_loc
 from modules.utilities.cache import MetricCache
+from modules.LOC_api.modified_LOC import run_cloc, compute_modified_loc
 
 loc_cache = MetricCache()
 app = Flask(__name__)

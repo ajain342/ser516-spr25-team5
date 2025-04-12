@@ -1,28 +1,31 @@
 import unittest
-import requests
-import json
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../")))
+from modules.LOC_api.app import app  # Update this import path based on your structure
 
 class TestLOCAPI(unittest.TestCase):
-    BASE_URL = 'http://localhost:5002'  
-    LOC_ENDPOINT = f'{BASE_URL}/loc'
+
+    def setUp(self):
+        self.client = app.test_client()
     
     def test_home_endpoint(self):
         """Test root endpoint returns welcome message"""
-        response = requests.get(self.BASE_URL)
-        print(f"\n[GET /] Response: {response.text}")
+        response = self.client.get('/')
+        print(f"\n[GET /] Response: {response.get_data(as_text=True)}")
         
         self.assertEqual(response.status_code, 200)
-        data = response.json()
+        data = response.get_json()
         self.assertIn('message', data)
         self.assertEqual(data['message'], "Visit /loc to calculate LOC")
 
     def test_missing_repo_url(self):
         """Test missing repository URL parameter"""
-        response = requests.post(self.LOC_ENDPOINT, json={})
-        print(f"\n[POST /loc] No repo_url: {response.text}")
+        response = self.client.post('/loc', json={})
+        print(f"\n[POST /loc] No repo_url: {response.get_data(as_text=True)}")
         
         self.assertEqual(response.status_code, 400)
-        data = response.json()
+        data = response.get_json()
         self.assertIn('error', data)
         self.assertEqual(data['error'], "Missing repo_url in request")
 
@@ -32,14 +35,13 @@ class TestLOCAPI(unittest.TestCase):
             'repo_url': 'https://github.com/timescale/tsbs',
             'method': 'invalid'
         }
-        response = requests.post(self.LOC_ENDPOINT, json=payload)
-        print(f"\n[POST /loc] Invalid method: {response.text}")
+        response = self.client.post('/loc', json=payload)
+        print(f"\n[POST /loc] Invalid method: {response.get_data(as_text=True)}")
         
         self.assertEqual(response.status_code, 400)
-        data = response.json()
+        data = response.get_json()
         self.assertIn('error', data)
         self.assertEqual(data['error'], "Invalid method. Use 'online' or 'modified'")
-
 
 if __name__ == '__main__':
     unittest.main(argv=[''], exit=False)
