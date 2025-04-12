@@ -75,7 +75,6 @@ class TestMTTRAPI(unittest.TestCase):
             self.assertEqual(data['method'], 'modified')
             self.assertIsInstance(data['result'], float)
         else:
-            # Still a valid test: maybe the repo clone or calc failed
             self.assertIn('error', data)
 
     def test_online_method_calculation(self):

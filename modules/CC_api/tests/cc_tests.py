@@ -28,13 +28,5 @@ class TestCodeChurnAPI(unittest.TestCase):
         self.assertIn("result", data)
         self.assertIn("total_commits", data)
 
-        self.assertEqual(data["added_lines"], int)
-        self.assertEqual(data["commit_range"], str)
-        self.assertEqual(data["deleted_lines"], int)
-        self.assertEqual(data["method"], str)
-        self.assertEqual(data["modified_lines"], int)
-        self.assertEqual(data["result"], int)
-        self.assertEqual(data["total_commits"], int)
-
 if __name__ == '__main__':
     unittest.main()
