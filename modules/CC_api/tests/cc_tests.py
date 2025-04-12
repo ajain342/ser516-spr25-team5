@@ -2,7 +2,7 @@ import unittest
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../")))
-from modules.CC_api.app import app  # Update this import to your correct path
+from modules.CC_api.app import app
 
 class TestCodeChurnAPI(unittest.TestCase):
     
@@ -28,8 +28,6 @@ class TestCodeChurnAPI(unittest.TestCase):
         self.assertIn("result", data)
         self.assertIn("total_commits", data)
 
-        # The following exact values are brittle if the repo changes
-        # Consider commenting these out or updating them dynamically if needed
         self.assertEqual(data["added_lines"], 5664)
         self.assertEqual(data["commit_range"], "HEAD~10 to HEAD")
         self.assertEqual(data["deleted_lines"], 819)
