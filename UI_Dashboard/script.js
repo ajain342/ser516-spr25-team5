@@ -53,6 +53,7 @@ async function calculate() {
         resultChart2 = null;
     }
 
+
     // Basic validation for empty input
     if (!repoUrlInput) {
         alert('Please enter a GitHub repository URL');
@@ -105,6 +106,7 @@ async function calculate() {
     const chartCanvas1 = document.getElementById('resultChart');
     const chartCanvas2 = document.getElementById('resultChart2');
 
+
     let apiError = null;
     let modifiedData = null;
     let onlineData = null;
@@ -147,6 +149,8 @@ async function calculate() {
         calculateBtn.disabled = false;
     });
     if (apiError) return;
+
+    let combinedHTML = '';
 
     // Build Modified method text output
     modifiedOutputHTML = `<div class="result-box">
@@ -224,6 +228,7 @@ async function calculate() {
         modifiedOutputHTML += `<strong>Lines of Code:</strong> ${modifiedData.result.result}`;
     }
     modifiedOutputHTML += `</div>`;
+    combinedHTML += modifiedOutputHTML;
 
     // Second API call (Online method)
     await fetch('/analyze', {
@@ -250,34 +255,46 @@ async function calculate() {
     });
     if (apiError) return;
 
-    // Build Online method text output
-    onlineOutputHTML = `<div class="result-box">
-        <h3>Online Output</h3>
-        <strong>Metric:</strong> ${onlineData.metric || "N/A"}<br>
-        <strong>Repo:</strong> ${onlineData.repo_url ? `<a href="${onlineData.repo_url}" target="_blank">${onlineData.repo_url}</a>` : "N/A"}<br>`;
-    if (onlineData.metric === 'mttr') {
-        onlineOutputHTML += `<strong>MTTR Hours:</strong> ${onlineData.result.result || "N/A"}<br>`;
-    } else if (onlineData.metric === 'code-churn' && typeof onlineData.result === 'object') {
-        onlineOutputHTML += `<strong>Added Lines:</strong> ${onlineData.result.added_lines || "N/A"}<br>
-        <strong>Deleted Lines:</strong> ${onlineData.result.deleted_lines || "N/A"}<br>
-        <strong>Modified Lines:</strong> ${onlineData.result.modified_lines || "N/A"}<br>
-        <strong>Net Change (Churn):</strong> ${onlineData.result.result || "N/A"}<br>
-        <strong>Total Commits:</strong> ${onlineData.result.total_commits || "N/A"}<br> <!-- MODIFIED -->
-        <strong>Commit Range:</strong> ${onlineData.result.commit_range || "N/A"}`;
-    } else if (onlineData.metric === 'loc' && onlineData.result !== undefined) {
-        onlineOutputHTML += `<strong>Lines of Code:</strong> ${onlineData.result.result}`;
+
+    if(onlineData.metric === "mttr" || onlineData.metric === "loc" || onlineData.metric === "code-churn") {
+        // Build Online method text output
+        onlineOutputHTML = `<div class="result-box">
+            <h3>Online Output</h3>
+            <strong>Metric:</strong> ${onlineData.metric || "N/A"}<br>
+            <strong>Repo:</strong> ${onlineData.repo_url ? `<a href="${onlineData.repo_url}" target="_blank">${onlineData.repo_url}</a>` : "N/A"}<br>`;
+        if (onlineData.metric === 'mttr') {
+            onlineOutputHTML += `<strong>MTTR Hours:</strong> ${onlineData.result.result || "N/A"}<br>`;
+        } else if (onlineData.metric === 'code-churn' && typeof onlineData.result === 'object') {
+            onlineOutputHTML += `<strong>Added Lines:</strong> ${onlineData.result.added_lines || "N/A"}<br>
+            <strong>Deleted Lines:</strong> ${onlineData.result.deleted_lines || "N/A"}<br>
+            <strong>Modified Lines:</strong> ${onlineData.result.modified_lines || "N/A"}<br>
+            <strong>Net Change (Churn):</strong> ${onlineData.result.result || "N/A"}<br>
+            <strong>Total Commits:</strong> ${onlineData.result.total_commits || "N/A"}<br> <!-- MODIFIED -->
+            <strong>Commit Range:</strong> ${onlineData.result.commit_range || "N/A"}`;
+        } else if (onlineData.metric === 'loc' && onlineData.result !== undefined) {
+            onlineOutputHTML += `<strong>Lines of Code:</strong> ${onlineData.result.result}`;
+        }
+        onlineOutputHTML += `</div>`;
+
+        combinedHTML += onlineOutputHTML;
+        
     }
-    onlineOutputHTML += `</div>`;
 
-    // Combine both outputs side by side
     resultDiv.style.display = 'block';
-    resultDiv.innerHTML = `<div class="result-container" style="display: flex; gap:20px;">` +
-                           modifiedOutputHTML + onlineOutputHTML +
-                           `</div>`;
 
-    // Render Modified chart
+
+    resultDiv.innerHTML = `<div class="result-container" style="display: flex; gap:20px;">${combinedHTML}</div>`;
+    resultDiv.style.display = 'block';
+
+
+    
+
+
+    chartCanvas1.style.display = 'block';
+
     let chartData = { labels: [], data: [] };
     let chartType = 'bar';
+    
     if (modifiedData.metric === 'mttr') {
         chartData.labels = ['MTTR'];
         chartData.data = [modifiedData.result.result];
@@ -288,6 +305,27 @@ async function calculate() {
     } else if (modifiedData.metric === 'loc') {
         chartData.labels = ['Lines of Code'];
         chartData.data = [modifiedData.result.result];
+    } else if (modifiedData.metric === 'cc' && Array.isArray(modifiedData.result.results)) {
+        chartData.labels = [];
+        chartData.data = [];
+        modifiedData.result.results.forEach(item => {
+            if (item["Function name"] && item["Cyclomatic complexity"] !== undefined) {
+                chartData.labels.push(item["Function name"]);
+                chartData.data.push(item["Cyclomatic complexity"]);
+            }
+        });
+    } else if(modifiedData.metric === 'hm') {
+        const summary = modifiedData.result.file_metrics.find(item => item.Summary !== undefined);
+        const sum = summary ? summary.Summary: {};
+        const totalDifficulty = sum["Total Difficulty"];
+        chartData.labels = ['Total Difficulty'];
+        chartData.data = [totalDifficulty];
+    } else if (modifiedData.metric === 'dt') {
+        const sum = modifiedData.result.summary || {};
+        const percent = sum["percent_completed"];
+        chartData.labels = ['Completed', 'Incomplete'];
+        chartData.data = [percent, 100-percent];
+        chartType = 'pie';
     }
     chartCanvas1.style.display = 'block';
     resultChart = new Chart(chartCanvas1, {
@@ -313,43 +351,50 @@ async function calculate() {
         }
     });
 
+
     // Render Online chart
-    chartData = { labels: [], data: [] };
-    chartType = 'bar';
-    if (onlineData.metric === 'mttr') {
-        chartData.labels = ['MTTR'];
-        chartData.data = [onlineData.result.result];
-    } else if (onlineData.metric === 'code-churn' && typeof onlineData.result === 'object') {
-        chartData.labels = ['Added Lines', 'Deleted Lines', 'Modified Lines'];
-        chartData.data = [onlineData.result.added_lines, onlineData.result.deleted_lines, onlineData.result.modified_lines];
-        chartType = 'pie';
-    } else if (onlineData.metric === 'loc') {
-        chartData.labels = ['Lines of Code'];
-        chartData.data = [onlineData.result.result];
-    }
-    chartCanvas2.style.display = 'block';
-    resultChart2 = new Chart(chartCanvas2, {
-        type: chartType,
-        data: {
-            labels: chartData.labels,
-            datasets: [{
-                label: 'Metric Values (Online)',
-                data: chartData.data,
-                backgroundColor: chartType === 'bar'
-                    ? '#4CAF50'
-                    : ['#4CAF50', '#FF5733', '#FFC300'],
-            }]
-        },
-        options: {
-            responsive: false,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'top' },
-                title: { display: true, text: 'Metric Visualization (Online)' },
-                animation: false
-            }
+
+    if(onlineData.metric !== "cc" && onlineData.metric !== "hm" && onlineData.metric !== "dt") {
+
+        chartData = { labels: [], data: [] };
+        chartType = 'bar';
+        if (onlineData.metric === 'mttr') {
+            chartData.labels = ['MTTR'];
+            chartData.data = [onlineData.result.result];
+        } else if (onlineData.metric === 'code-churn' && typeof onlineData.result === 'object') {
+            chartData.labels = ['Added Lines', 'Deleted Lines', 'Modified Lines'];
+            chartData.data = [onlineData.result.added_lines, onlineData.result.deleted_lines, onlineData.result.modified_lines];
+            chartType = 'pie';
+        } else if (onlineData.metric === 'loc') {
+            chartData.labels = ['Lines of Code'];
+            chartData.data = [onlineData.result.result];
         }
-    });
+        chartCanvas2.style.display = 'block';
+        resultChart2 = new Chart(chartCanvas2, {
+            type: chartType,
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Metric Values (Online)',
+                    data: chartData.data,
+                    backgroundColor: chartType === 'bar'
+                        ? '#4CAF50'
+                        : ['#4CAF50', '#FF5733', '#FFC300'],
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Metric Visualization (Online)' },
+                    animation: false
+                }
+            }
+        });   
+
+    }
+    
 }
 
 function resetFields() {
