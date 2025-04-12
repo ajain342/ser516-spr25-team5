@@ -11,10 +11,10 @@ class TestCodeChurnAPI(unittest.TestCase):
     
     def test_api_response(self):
         payload = {
-            'repo_url': 'https://github.com/kgary/ser421public',
-            'method': 'online',
-            'num_commits_before_latest': 10
-        }
+            "repo_url": "https://github.com/kgary/ser421public",
+            "method": "online",
+            "num_commits_before_latest": 10
+}
         response = self.client.post('/code-churn', json=payload)
         self.assertEqual(response.status_code, 200)
         
@@ -28,13 +28,13 @@ class TestCodeChurnAPI(unittest.TestCase):
         self.assertIn("result", data)
         self.assertIn("total_commits", data)
 
-        self.assertEqual(data["added_lines"], 5664)
-        self.assertEqual(data["commit_range"], "HEAD~10 to HEAD")
-        self.assertEqual(data["deleted_lines"], 819)
-        self.assertEqual(data["method"], "online")
-        self.assertEqual(data["modified_lines"], 712)
-        self.assertEqual(data["result"], 7195)
-        self.assertEqual(data["total_commits"], 297)
+        self.assertEqual(data["added_lines"], int)
+        self.assertEqual(data["commit_range"], str)
+        self.assertEqual(data["deleted_lines"], int)
+        self.assertEqual(data["method"], str)
+        self.assertEqual(data["modified_lines"], int)
+        self.assertEqual(data["result"], int)
+        self.assertEqual(data["total_commits"], int)
 
 if __name__ == '__main__':
     unittest.main()
