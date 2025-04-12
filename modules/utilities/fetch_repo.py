@@ -10,17 +10,17 @@ SHARED_BASE_DIR = "/shared/repos"
 
 def fetch_repo(repo_url):
     if not repo_url:
-        return {"error": "No repository URL provided. Please enter a valid GitHub repository URL."}
+        raise ValueError("No repository URL provided. Please enter a valid GitHub repository URL.")
 
     parsed = urlparse(repo_url)
     if parsed.netloc.lower() != "github.com" or parsed.path.count("/") < 2:
-        return {"error": "Invalid GitHub repository URL. Ensure it follows the format 'https://github.com/owner/repo'."}
+        raise ValueError("Invalid GitHub repository URL. Ensure it follows the format 'https://github.com/owner/repo'.")
 
     repo_path = parsed.path.strip("/")
     if repo_path.endswith(".git"):
         repo_path = repo_path[:-4]
     if not re.match(r"^[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+$", repo_path):
-        return {"error": "Malformed repository URL. Ensure the URL points to a valid GitHub repository."}
+        raise ValueError("Malformed repository URL. Ensure the URL points to a valid GitHub repository.")
 
     owner, repo = repo_path.split("/")
     repo_dir = Path(SHARED_BASE_DIR) / owner / repo
@@ -52,12 +52,12 @@ def fetch_repo(repo_url):
         except subprocess.CalledProcessError as e:
             error_output = e.stderr.lower() if e.stderr else ""
             if "not found" in error_output:
-                return {"error": "Repository not found. Please check the URL."}
+                raise RuntimeError("Repository not found. Please check the URL.")
             elif "authentication" in error_output or "permission denied" in error_output:
-                return {"error": "Private repository or insufficient permissions. Please check your access."}
+                raise PermissionError("Private repository or insufficient permissions. Please check your access.")
             else:
-                return {"error": f"Git error: {e.stderr or e.stdout}"}
+                raise RuntimeError(f"Git error: {e.stderr or e.stdout}")
         except Exception as e:
-            return {"error": f"Unexpected error: {str(e)}"}
+            raise RuntimeError(f"Unexpected error: {str(e)}")
 
     return head_sha, str(repo_dir)

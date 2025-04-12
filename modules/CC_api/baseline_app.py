@@ -34,12 +34,12 @@ def get_git_code_churn(repo_url, num_commits_before_latest):
     try:
         if not repo_url:
             return jsonify({"error": "Missing repository URL"}), 400
-        
-        fetch_result = fetch_repo(repo_url)
-        if "error" in fetch_result:
-            return jsonify({"error": fetch_result["error"]}), 400
-        
-        repo_path = fetch_result["repo_dir"]
+
+        try:
+            head_sha, repo_path = fetch_repo(repo_url)
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400
+
         total_commits = int(subprocess.run(["git", "rev-list", "--count", "HEAD"], cwd=repo_path, capture_output=True, text=True, check=True).stdout.strip())
         if total_commits == 0:
             return jsonify({"error": "Repository has no commits"}), 400

@@ -52,11 +52,8 @@ def code_churn():
             if not repo_url:
                 return jsonify({"error": "Missing 'repo_url' in request data"}), 400
 
-            fetch_result = fetch_repo(repo_url)
-            if isinstance(fetch_result, dict) and "error" in fetch_result:
-                return jsonify({"error": fetch_result["error"]}), 400
+            head_sha, repo_path = fetch_repo(repo_url)
 
-            head_sha, repo_path = fetch_result
             repo = git.Repo(repo_path)
             total_commits = get_commit_count(repo)
 
