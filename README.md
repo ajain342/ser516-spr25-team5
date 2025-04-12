@@ -156,8 +156,8 @@ POST [http://localhost:5003/mttr](http://localhost:5003/mttr)
 **Directory**: `project-root`
 
 ```bash
-docker build --no-cache -f modules/CYCLO_api/Dockerfile -t cc-test .
-docker run -p 5005:5005 cc-test
+docker build --no-cache -f modules/CYCLO_api/Dockerfile -t ccy-test .
+docker run -p 5005:5005 ccy-test
 ```
 **Test the service**:
 ```
@@ -172,11 +172,9 @@ POST [http://localhost:5005/cc](http://localhost:5005/cc)
 
 ```json
 {
-{
   "metric": "cc",
   "repo_url": "https://github.com/your-repo-url",
   "method": "modified"
-}
 }
 ```
 
@@ -201,11 +199,9 @@ POST [http://localhost:5006/hm](http://localhost:5006/hm)
 
 ```json
 {
-{
   "metric": "hm",
   "repo_url": "https://github.com/your-repo-url",
   "method": "modified"
-}
 }
 ```
 
@@ -230,11 +226,9 @@ POST [http://localhost:5004/dt](http://localhost:5004/dt)
 
 ```json
 {
-{
   "metric": "dt",
   "repo_url": "https://github.com/your-repo-url",
   "method": "modified"
-}
 }
 ```
 
