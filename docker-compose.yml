@@ -5,6 +5,7 @@ services:
       dockerfile: ./modules/LOC_api/Dockerfile
     volumes:
       - ./src:/app/src
+      - shared-repos:/shared/repos
     ports:
       - "${LOC_PORT}:5002"
     networks:
@@ -16,6 +17,7 @@ services:
       dockerfile: ./modules/MTTR_api/Dockerfile
     volumes:
       - ./src:/app/src
+      - shared-repos:/shared/repos
     ports:
       - "${MTTR_PORT}:5003"
     networks:
@@ -27,15 +29,18 @@ services:
       dockerfile: ./modules/CC_api/Dockerfile
     volumes:
       - ./src:/app/src
+      - shared-repos:/shared/repos
     ports:
       - "${CC_PORT}:5001"
     networks:
       - analysis-network
 
   defects-over-time:
-    build: ./modules/defects-over-time
+    build:
+      context: .
+      dockerfile: modules/defects-over-time/Dockerfile
     ports:
-      - "${DEFECTS_PORT}:5000"
+      - "${DEFECTS_PORT}:5004"
     networks:
       - analysis-network
 
@@ -47,6 +52,8 @@ services:
       - "${CYCLO_PORT}:5005"
     networks:
       - analysis-network
+    volumes:
+      - shared-repos:/shared/repos
   
   hal_api: 
     build: 
@@ -56,6 +63,8 @@ services:
       - "${HAL_PORT}:5006"
     networks:
       - analysis-network
+    volumes:
+      - shared-repos:/shared/repos
 
   controller:
     build:
@@ -79,3 +88,7 @@ networks:
   analysis-network:
     name: analysis-network
     driver: bridge
+
+volumes:
+  shared-repos:
+    

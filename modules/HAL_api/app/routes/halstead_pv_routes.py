@@ -6,6 +6,8 @@ from app.services.halstead_pv_service import HalsteadMetrics
 from app.services.extractor import Extractor, ParsingException
 from modules.utilities.fetch_repo import fetch_repo
 from modules.utilities.read_java_files import read_files
+from modules.utilities.cache import MetricCache
+cache = MetricCache()
 
 bp = Blueprint("halstead_pv", __name__)
 
@@ -43,7 +45,7 @@ def info():
 
 
 
-@bp.route("/run", methods=["POST"])
+@bp.route("/hm", methods=["POST"])
 def calculate_halstead_metrics():
     try:
         data = request.get_json()
@@ -51,16 +53,24 @@ def calculate_halstead_metrics():
         if not repo_url:
             return jsonify({"error": "Missing 'repo_url'"}), 400
 
-        result = fetch_repo(repo_url)
-        code_files = read_files(result["temp_dir"])
+        fetch_result = fetch_repo(repo_url)
+        if isinstance(fetch_result, dict) and "error" in fetch_result:
+            return jsonify({"error": fetch_result["error"]}), 400
 
+        head_sha, repo_dir = fetch_result
+        cache_key = f"{repo_url}|{head_sha}"
+
+        if cache.contains(cache_key):
+            return jsonify({"cached": True, "file_metrics": cache.get(cache_key)}), 200
+
+        code_files = read_files(repo_dir)
         if not code_files:
             return jsonify({"message": "No Java files found in the repository"}), 400
 
-        project_metrics = []
-
         if not isinstance(code_files, dict):
             return jsonify({"error": "'file_path' must contain a dictionary of file paths and contents."}), 400
+
+        project_metrics = []
 
         for file_path, code in code_files.items():
             if not isinstance(code, str):
@@ -82,10 +92,17 @@ def calculate_halstead_metrics():
         if not project_metrics:
             return jsonify({"error": "No valid Halstead metrics calculated."}), 400
 
-        aggregated_metrics = HalsteadMetrics.aggregate_metrics({m["file_name"]: m["metrics"] for m in project_metrics})
+        aggregated_metrics = HalsteadMetrics.aggregate_metrics(
+            {m["file_name"]: m["metrics"] for m in project_metrics}
+        )
         project_metrics.append({"Summary": aggregated_metrics})
 
+        cache.add(cache_key, project_metrics)
         return jsonify({"file_metrics": project_metrics}), 200
+
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "An unexpected error occurred while processing your request."}), 500
 
     except Exception as e:
         print(e)

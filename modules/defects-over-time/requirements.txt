@@ -2,3 +2,4 @@ pytest
 flask
 requests
 requests_mock
+gitpython

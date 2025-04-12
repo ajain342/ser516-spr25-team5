@@ -1,12 +1,11 @@
 from flask import Flask, request, jsonify
 from urllib.parse import urlparse
-from online_Tool import fetch_loc_codetabs
+from modules.LOC_api.online_Tool import fetch_loc_codetabs
 from modules.utilities.fetch_repo import fetch_repo
-from modified_LOC import run_cloc, compute_modified_loc
-import tempfile
-import os
-import json
+from modules.utilities.cache import MetricCache
+from modules.LOC_api.modified_LOC import run_cloc, compute_modified_loc
 
+loc_cache = MetricCache()
 app = Flask(__name__)
 
 def parse_url(repo_url):
@@ -28,9 +27,9 @@ def get_loc():
     
     if not data or 'repo_url' not in data:
         return jsonify({"error": "Missing repo_url in request"}), 400
-    
+
     repo_url = data['repo_url']
-    method = data.get('method', 'modified')  # Default to cloc
+    method = data.get('method', 'modified')
 
     repo_path = parse_url(repo_url)
     if not repo_path:
@@ -38,19 +37,38 @@ def get_loc():
 
     try:
         if method == 'modified':
-            with tempfile.TemporaryDirectory() as temp_dir:
-                fetch_result = fetch_repo(repo_url)
-                cloned_path = fetch_result["temp_dir"]
+            fetch_result = fetch_repo(repo_url)
+            if isinstance(fetch_result, dict) and "error" in fetch_result:
+                return jsonify({"error": fetch_result["error"]}), 400
+
+            head_sha, cloned_path = fetch_result
+            cache_key = f"{repo_url}|{head_sha}"
+
+            if loc_cache.contains(cache_key):
+                result = loc_cache.get(cache_key)
+            else:
                 cloc_json = run_cloc(cloned_path)
                 result = compute_modified_loc(cloc_json)
-                
+                loc_cache.add(cache_key, result)
+
         elif method == 'online':
-            result = fetch_loc_codetabs(repo_path).get("total_lines", 0)
+            fetch_result = fetch_repo(repo_url)
+            if isinstance(fetch_result, dict) and "error" in fetch_result:
+                return jsonify({"error": fetch_result["error"]}), 400
+
+            head_sha, _ = fetch_result
+            cache_key = f"{repo_url}|{head_sha}|online"
+
+            if loc_cache.contains(cache_key):
+                result = loc_cache.get(cache_key)
+            else:
+                result = fetch_loc_codetabs(repo_path).get("total_lines", 0)
+                loc_cache.add(cache_key, result)
         else:
             return jsonify({"error": "Invalid method. Use 'online' or 'modified'"}), 400
-        
-        return jsonify({"method" : method, "result": result})
-    
+
+        return jsonify({"method": method, "result": result})
+
     except Exception as e:
         return jsonify({
             "error": f"Server error: {str(e)}",

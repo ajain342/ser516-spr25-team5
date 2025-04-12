@@ -85,11 +85,9 @@ def main():
             print(f"Error: {fetch_result['error']}")
             return
             
-        repo_path = fetch_result["temp_dir"]
+        repo_path = fetch_result["repo_dir"]
         if repo_path:
             get_git_code_churn(repo_path)
-            if os.path.exists(repo_path):
-                shutil.rmtree(repo_path, ignore_errors=True)
     except Exception as e:
         print(f"An error occurred: {e}")
 

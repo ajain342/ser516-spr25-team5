@@ -60,6 +60,9 @@ Access the application at: [http://localhost:5000/home](http://localhost:5000/ho
    - LOC (Lines of Code)
    - Code Churn
    - MTTR (Mean Time to Resolve)
+   - Cyclomatic Complexity
+   - Halstead Metrics
+   - Defect Tracking
 
    **Code Churn Specific**:
    - Enter the number of commits to analyze (must be ≤ total commits).
@@ -70,6 +73,7 @@ Access the application at: [http://localhost:5000/home](http://localhost:5000/ho
 4. View results in two graphs:
    - Modified: Custom implementation of the metric.
    - Online: Baseline from existing tools.
+   - For Cyclomatic Complexity, Halstead Metrics, Defect Tracking we only have one way to calculate.
 
 ## Testing Individual Microservices
 
@@ -90,6 +94,7 @@ POST [http://localhost:5002/loc](http://localhost:5002/loc)
 
 ```json
 {
+  "metric": "loc",
   "repo_url": "https://github.com/your-repo-url",
   "method": "online"  or "modified"
 }
@@ -112,6 +117,7 @@ POST [http://localhost:5001/code-churn](http://localhost:5001/code-churn)
 
 ```json
 {
+  "metric": "code-churn",
   "repo_url": "https://github.com/your-repo-url",
   "method": "online",  or "modified"
   "num_commits_before_latest": 10
@@ -139,8 +145,90 @@ POST [http://localhost:5003/mttr](http://localhost:5003/mttr)
 
 ```json
 {
+  "metric": "mttr",
   "repo_url": "https://github.com/your-repo-url",
   "method": "online"  or "modified"
+}
+```
+
+### Cyclomatic Complexity Microservice
+
+**Directory**: `project-root`
+
+```bash
+docker build --no-cache -f modules/CYCLO_api/Dockerfile -t ccy-test .
+docker run -p 5005:5005 ccy-test
+```
+**Test the service**:
+```
+python modules\CYCLO_api\tests\cyclo_test.py
+```
+
+**API Endpoint**:
+
+POST [http://localhost:5005/cc](http://localhost:5005/cc)
+
+**Request Body**:
+
+```json
+{
+  "metric": "cc",
+  "repo_url": "https://github.com/your-repo-url",
+  "method": "modified"
+}
+```
+
+### Halstead Metrics Microservice
+
+**Directory**: `project-root`
+
+```bash
+docker build --no-cache -f modules/HAL_api/Dockerfile -t hm-test .
+docker run -p 5006:5006 hm-test
+```
+**Test the service**:
+```
+python modules\HAL_api\tests\halstead_pv_test.py
+```
+
+**API Endpoint**:
+
+POST [http://localhost:5006/hm](http://localhost:5006/hm)
+
+**Request Body**:
+
+```json
+{
+  "metric": "hm",
+  "repo_url": "https://github.com/your-repo-url",
+  "method": "modified"
+}
+```
+
+### Defect Tracking Microservice
+
+**Directory**: `project-root`
+
+```bash
+docker build --no-cache -f modules/defects-over-time/Dockerfile -t dt-test .
+docker run -p 5004:5004 dt-test
+```
+**Test the service**:
+```
+python modules\defects-over-time\tests\defect_test.py
+```
+
+**API Endpoint**:
+
+POST [http://localhost:5004/dt](http://localhost:5004/dt)
+
+**Request Body**:
+
+```json
+{
+  "metric": "dt",
+  "repo_url": "https://github.com/your-repo-url",
+  "method": "modified"
 }
 ```
 
