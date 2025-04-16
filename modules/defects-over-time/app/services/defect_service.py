@@ -107,4 +107,4 @@ def defect_service(defect_request):
         "average_time_to_close": round(avg_time_to_close, 2),
     }
 
-    return make_response(jsonify({"summary": summary}), 200)
+    return make_response(jsonify({"data": summary, "timestamp": datetime.now().isoformat()}), 200)
