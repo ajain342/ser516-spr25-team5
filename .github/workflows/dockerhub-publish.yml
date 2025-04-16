@@ -1,0 +1,48 @@
+name: Services Docker Publish
+
+on:
+  release:
+    types: [published]
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+jobs:
+  publish-services:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - CC_api
+          - CYCLO_api
+          - defects-over-time
+          - HAL_api
+          - ICI_api
+          - LOC_api
+          - MTTR_api
+          
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        run: |
+          echo "${DOCKERHUB_TOKEN}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
+
+      - name: Set release version
+        id: vars
+        run: echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Build and tag Docker image
+        run: |
+          IMAGE_NAME=${DOCKERHUB_USERNAME}/ser516-${{ matrix.service }}:${RELEASE_TAG}
+          docker build -t "$IMAGE_NAME" ./modules/${{ matrix.service }}
+
+      - name: Push Docker image
+        run: |
+          IMAGE_NAME=${DOCKERHUB_USERNAME}/${{ matrix.service }}:${RELEASE_TAG}
+          docker push "$IMAGE_NAME"
