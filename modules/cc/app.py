@@ -6,6 +6,7 @@ from modules.cc.baseline_app import get_git_code_churn
 from modules.utilities.fetch_repo import fetch_repo
 from modules.utilities.cache import MetricCache
 import git
+from modules.utilities.response_wrapper import wrap_with_timestamp
 
 app = Flask(__name__)
 cache = MetricCache()
@@ -87,7 +88,7 @@ def code_churn():
                 cache.add(cache_key, result)
 
             repo.close()
-            return jsonify(result)
+            return jsonify(wrap_with_timestamp(result))
 
         elif method == "online":
             return get_git_code_churn(repo_url, num_commits_before_latest)

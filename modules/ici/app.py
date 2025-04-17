@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from ici import compute_ici
+from modules.utilities.response_wrapper import wrap_with_timestamp
 
 app = Flask(__name__)
 
@@ -17,7 +18,7 @@ def get_ici():
 
     try:
         result = compute_ici(repo_url)
-        return jsonify(result)
+        return jsonify(wrap_with_timestamp(result)), 200
     except Exception as e:
         return jsonify({"error": f"Server error: {str(e)}", "repo_url": repo_url}), 500
 

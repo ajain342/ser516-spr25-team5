@@ -6,6 +6,7 @@ from app.services.cyclo_service import get_cc
 from modules.utilities.fetch_repo import fetch_repo
 from modules.utilities.read_java_files import read_files
 from modules.utilities.cache import MetricCache
+from modules.utilities.response_wrapper import wrap_with_timestamp
 
 bp = Blueprint("cyclo", __name__)
 cc_cache = MetricCache()
@@ -57,7 +58,7 @@ def analyze_cc():
         results = get_cc(code)
         cc_cache.add(cache_key, results)
 
-        return jsonify({"method": "modified", "results": results}), 200
+        return jsonify(wrap_with_timestamp(results)), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

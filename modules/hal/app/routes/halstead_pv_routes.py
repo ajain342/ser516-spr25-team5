@@ -8,6 +8,7 @@ from modules.utilities.fetch_repo import fetch_repo
 from modules.utilities.read_java_files import read_files
 from modules.utilities.cache import MetricCache
 cache = MetricCache()
+from modules.utilities.response_wrapper import wrap_with_timestamp
 
 bp = Blueprint("halstead_pv", __name__)
 
@@ -98,7 +99,7 @@ def calculate_halstead_metrics():
         project_metrics.append({"Summary": aggregated_metrics})
 
         cache.add(cache_key, project_metrics)
-        return jsonify({"file_metrics": project_metrics}), 200
+        return jsonify(wrap_with_timestamp(project_metrics)), 200
 
     except Exception as e:
         print(e)

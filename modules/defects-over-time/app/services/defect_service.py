@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import requests
 from flask import jsonify, make_response
+from modules.utilities.response_wrapper import wrap_with_timestamp
 
 GITHUB_API_URL = "https://api.github.com"
 
@@ -97,7 +98,7 @@ def defect_service(defect_request):
     ]
     avg_time_to_close = sum(time_to_close) / len(time_to_close) if time_to_close else 0
 
-    summary = {
+    data = {
         "total_issues": total_issues,
         "completed_issues": completed_issues,
         "open_issues": open_issues,
@@ -107,4 +108,4 @@ def defect_service(defect_request):
         "average_time_to_close": round(avg_time_to_close, 2),
     }
 
-    return make_response(jsonify({"data": summary, "timestamp": datetime.now().isoformat()}), 200)
+    return make_response(jsonify(wrap_with_timestamp(data)), 200)
