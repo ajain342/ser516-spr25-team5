@@ -26,7 +26,6 @@ jobs:
           - loc
           - mttr
 
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -41,11 +40,24 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          IMAGE_NAME=${DOCKERHUB_USERNAME}/ser516-${{ matrix.service }}:${RELEASE_TAG}
-          docker build -t "$IMAGE_NAME" ./modules/${{ matrix.service }}
-      
+          SERVICE=${{ matrix.service }}
+          IMAGE_NAME=${DOCKERHUB_USERNAME}/ser516-${SERVICE}:${RELEASE_TAG}
+          docker build \
+            --build-arg SERVICE_NAME=${SERVICE} \
+            -t "$IMAGE_NAME" \
+            -f Dockerfile \
+            .
+
       - name: Push Docker image
         run: |
-          IMAGE_NAME=${DOCKERHUB_USERNAME}/ser516-${{ matrix.service }}:${RELEASE_TAG}
+          SERVICE=${{ matrix.service }}
+          IMAGE_NAME=${DOCKERHUB_USERNAME}/ser516-${SERVICE}:${RELEASE_TAG}
           docker push "$IMAGE_NAME"
 
+      - name: Tag and push latest
+        run: |
+          SERVICE=${{ matrix.service }}
+          VERSIONED_IMAGE=${DOCKERHUB_USERNAME}/ser516-${SERVICE}:${RELEASE_TAG}
+          LATEST_IMAGE=${DOCKERHUB_USERNAME}/ser516-${SERVICE}:latest
+          docker tag "$VERSIONED_IMAGE" "$LATEST_IMAGE"
+          docker push "$LATEST_IMAGE"

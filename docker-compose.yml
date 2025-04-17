@@ -2,7 +2,9 @@ services:
   loc_api:
     build:
       context: .
-      dockerfile: ./modules/LOC_api/Dockerfile
+      dockerfile: DockerfileServices
+      args:
+        SERVICE_NAME: loc
     volumes:
       - ./src:/app/src
       - shared-repos:/shared/repos
@@ -14,7 +16,9 @@ services:
   mttr_api:
     build:
       context: .
-      dockerfile: ./modules/MTTR_api/Dockerfile
+      dockerfile: DockerfileServices
+      args:
+        SERVICE_NAME: mttr
     volumes:
       - ./src:/app/src
       - shared-repos:/shared/repos
@@ -26,7 +30,9 @@ services:
   cc_api:
     build:
       context: .
-      dockerfile: ./modules/CC_api/Dockerfile
+      dockerfile: DockerfileServices
+      args:
+        SERVICE_NAME: cc
     volumes:
       - ./src:/app/src
       - shared-repos:/shared/repos
@@ -38,7 +44,9 @@ services:
   defects-over-time:
     build:
       context: .
-      dockerfile: modules/defects-over-time/Dockerfile
+      dockerfile: DockerfileServices
+      args:
+        SERVICE_NAME: defects-over-time
     ports:
       - "${DEFECTS_PORT}:5004"
     networks:
@@ -47,18 +55,22 @@ services:
   cyclo_api:
     build:
       context: .
-      dockerfile: ./modules/CYCLO_api/Dockerfile
-    ports: 
+      dockerfile: DockerfileServices
+      args:
+        SERVICE_NAME: cyclo
+    ports:
       - "${CYCLO_PORT}:5005"
     networks:
       - analysis-network
     volumes:
       - shared-repos:/shared/repos
-  
+
   hal_api: 
     build: 
       context: .
-      dockerfile: ./modules/HAL_api/Dockerfile
+      dockerfile: DockerfileServices
+      args:
+        SERVICE_NAME: hal
     ports:
       - "${HAL_PORT}:5006"
     networks:
@@ -69,7 +81,7 @@ services:
   controller:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: DockerfileController
     ports:
       - "${CONTROLLER_PORT}:5000"
     environment:
@@ -91,4 +103,3 @@ networks:
 
 volumes:
   shared-repos:
-    
