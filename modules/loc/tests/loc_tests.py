@@ -2,7 +2,7 @@ import unittest
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../")))
-from modules.LOC_api.app import app  # Update this import path based on your structure
+from modules.loc.main import app  # Update this import path based on your structure
 
 class TestLOCAPI(unittest.TestCase):
 

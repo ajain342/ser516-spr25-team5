@@ -43,7 +43,7 @@ jobs:
 
       - name: Install dependencies and run tests
         run: |
-          cd modules/LOC_api
+          cd modules/loc
           pip install -r requirements.txt
           python tests/loc_tests.py
 
@@ -61,7 +61,7 @@ jobs:
 
       - name: Install dependencies and run tests
         run: |
-          cd modules/MTTR_api
+          cd modules/mttr
           pip install -r requirements.txt
           python tests/MTTR_test.py
   
@@ -79,7 +79,7 @@ jobs:
       
       - name: Install dependencies and run tests
         run: |
-          cd modules/HAL_api
+          cd modules/hal
           pip install -r requirements.txt
           pytest
           
@@ -97,7 +97,7 @@ jobs:
       
       - name: Install dependencies and run tests
         run: |
-          cd modules/CYCLO_api
+          cd modules/cyclo
           pip install -r requirements.txt
           pytest
     

@@ -1,0 +1,25 @@
+FROM python:3.13
+
+ARG SERVICE_NAME
+ENV SERVICE_NAME=$SERVICE_NAME
+ENV PYTHONPATH="/app"
+WORKDIR /app
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    git \
+    cloc \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY modules/${SERVICE_NAME}/requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+COPY modules/utilities/ /app/modules/utilities/
+COPY modules/__init__.py /app/modules/__init__.py
+
+COPY modules/${SERVICE_NAME}/ /app/modules/${SERVICE_NAME}/
+
+EXPOSE 5000
+
+CMD sh -c "python /app/modules/$SERVICE_NAME/main.py"
