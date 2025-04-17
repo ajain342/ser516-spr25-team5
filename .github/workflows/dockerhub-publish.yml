@@ -40,10 +40,13 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          IMAGE_NAME=${DOCKERHUB_USERNAME}/ser516-${{ matrix.service }}:${RELEASE_TAG}
+          SERVICE_LOWER=$(echo "${{ matrix.service }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_NAME=${DOCKERHUB_USERNAME}/ser516-${SERVICE_LOWER}:${RELEASE_TAG}
           docker build -t "$IMAGE_NAME" ./modules/${{ matrix.service }}
-
+      
       - name: Push Docker image
         run: |
-          IMAGE_NAME=${DOCKERHUB_USERNAME}/${{ matrix.service }}:${RELEASE_TAG}
+          SERVICE_LOWER=$(echo "${{ matrix.service }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_NAME=${DOCKERHUB_USERNAME}/ser516-${SERVICE_LOWER}:${RELEASE_TAG}
           docker push "$IMAGE_NAME"
+
