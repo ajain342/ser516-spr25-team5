@@ -2,7 +2,7 @@ import unittest
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../")))
-from modules.MTTR_api.app import app
+from modules.mttr.app import app
 
 class TestMTTRAPI(unittest.TestCase):
 
