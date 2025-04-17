@@ -18,13 +18,14 @@ jobs:
     strategy:
       matrix:
         service:
-          - CC_api
-          - CYCLO_api
+          - cc
+          - cyclo
           - defects-over-time
-          - HAL_api
-          - ICI_api
-          - LOC_api
-          - MTTR_api
+          - hal
+          - ici
+          - loc
+          - mttr
+
 
     steps:
       - name: Checkout code
@@ -40,13 +41,11 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          SERVICE_LOWER=$(echo "${{ matrix.service }}" | tr '[:upper:]' '[:lower:]')
-          IMAGE_NAME=${DOCKERHUB_USERNAME}/ser516-${SERVICE_LOWER}:${RELEASE_TAG}
+          IMAGE_NAME=${DOCKERHUB_USERNAME}/ser516-${{ matrix.service }}:${RELEASE_TAG}
           docker build -t "$IMAGE_NAME" ./modules/${{ matrix.service }}
       
       - name: Push Docker image
         run: |
-          SERVICE_LOWER=$(echo "${{ matrix.service }}" | tr '[:upper:]' '[:lower:]')
-          IMAGE_NAME=${DOCKERHUB_USERNAME}/ser516-${SERVICE_LOWER}:${RELEASE_TAG}
+          IMAGE_NAME=${DOCKERHUB_USERNAME}/ser516-${{ matrix.service }}:${RELEASE_TAG}
           docker push "$IMAGE_NAME"
 
