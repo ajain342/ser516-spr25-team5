@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import datetime
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../../")))
 from flask import jsonify, Blueprint, request
 from app.services.halstead_pv_service import HalsteadMetrics
@@ -98,7 +99,8 @@ def calculate_halstead_metrics():
         project_metrics.append({"Summary": aggregated_metrics})
 
         cache.add(cache_key, project_metrics)
-        return jsonify({"file_metrics": project_metrics}), 200
+        return jsonify({"timeStamp": datetime.now().isoformat(),
+                       "data": {"file_metrics": project_metrics}}), 200
 
     except Exception as e:
         print(e)
