@@ -83,14 +83,18 @@ class TestMTTRAPI(unittest.TestCase):
             'method': 'online'
         }
         response = self.client.post('/mttr', json=payload)
-        data = response.get_json()
+        res = response.get_json()
 
         if response.status_code == 200:
-            self.assertIn('repo_url', data)
-            self.assertIn('result', data)
-            self.assertIn('method', data)
-            self.assertEqual(data['method'], 'online')
-            self.assertIsInstance(data['result'], float)
+            self.assertIn('data', res)
+            
+            data = res['data']
+            self.assertIn('error', data)
+            self.assertIn('mttr', data)
+            
+            self.assertIsNone(data['error'])
+            self.assertIsInstance(data['mttr'], float)
+            
         else:
             self.assertIn('error', data)
 
