@@ -1,6 +1,7 @@
 FROM python:3.13
 
 ARG SERVICE_NAME
+ENV SERVICE_NAME=$SERVICE_NAME
 ENV PYTHONPATH="/app"
 WORKDIR /app
 
@@ -21,4 +22,4 @@ COPY modules/${SERVICE_NAME}/ /app/modules/${SERVICE_NAME}/
 
 EXPOSE 5000
 
-CMD ["python", "/app/modules/${SERVICE_NAME}/main.py"]
+CMD sh -c "python /app/modules/$SERVICE_NAME/main.py"
