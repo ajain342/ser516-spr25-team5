@@ -63,7 +63,7 @@ def get_git_code_churn(repo_url, num_commits_before_latest):
             deleted_lines += d
             modified_lines += m
         
-        return jsonify({
+        return {
             "method": "online",
             "added_lines": added_lines,
             "commit_range": f"{start_commit} to {end_commit}",
@@ -71,7 +71,7 @@ def get_git_code_churn(repo_url, num_commits_before_latest):
             "modified_lines": modified_lines,
             "result": added_lines + deleted_lines + modified_lines,
             "total_commits": total_commits
-        })
+        }
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500
