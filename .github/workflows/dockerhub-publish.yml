@@ -45,7 +45,7 @@ jobs:
           docker build \
             --build-arg SERVICE_NAME=${SERVICE} \
             -t "$IMAGE_NAME" \
-            -f Dockerfile \
+            -f DockerfileServices \
             .
 
       - name: Push Docker image
