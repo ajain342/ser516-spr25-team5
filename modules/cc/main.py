@@ -5,6 +5,7 @@ from flask import Flask, request, jsonify
 from modules.cc.baseline_app import get_git_code_churn
 from modules.utilities.fetch_repo import fetch_repo
 from modules.utilities.cache import MetricCache
+from modules.utilities.response_wrapper import wrap_with_timestamp
 import git
 
 app = Flask(__name__)
@@ -87,10 +88,10 @@ def code_churn():
                 cache.add(cache_key, result)
 
             repo.close()
-            return jsonify(result)
+            return jsonify(wrap_with_timestamp(result))
 
         elif method == "online":
-            return get_git_code_churn(repo_url, num_commits_before_latest)
+            return jsonify(wrap_with_timestamp(get_git_code_churn(repo_url, num_commits_before_latest)))
 
         else:
             return jsonify({"error": "Invalid method. Use 'online' or 'modified'"}), 400
