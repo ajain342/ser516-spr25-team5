@@ -56,14 +56,15 @@ def test_defect_service_with_github_data(client, mock_github_response):
         )
 
         response = defect_service(defect_request)
-        data = response.get_json()
+        res = response.get_json()
 
-        assert data["summary"]["total_issues"] == 3
-        assert data["summary"]["completed_issues"] == 2
-        assert data["summary"]["open_issues"] == 1
-        assert "defect_discovery_rate_last_30_days" in data["summary"]
-        assert "defect_closure_rate_last_30_days" in data["summary"]
-        assert "average_time_to_close" in data["summary"]
+        assert res["timestamp"] is not None
+        assert res["data"]["total_issues"] == 3
+        assert res["data"]["completed_issues"] == 2
+        assert res["data"]["open_issues"] == 1
+        assert "defect_discovery_rate_last_30_days" in res["data"]
+        assert "defect_closure_rate_last_30_days" in res["data"]
+        assert "average_time_to_close" in res["data"]
 
 
 def test_defect_service_empty_github(client):
@@ -74,13 +75,13 @@ def test_defect_service_empty_github(client):
         m.get("https://api.github.com/repos/test-org/test-repo/issues", json=[])
 
         response = defect_service(defect_request)
-        data = response.get_json()
+        res = response.get_json()
 
-        assert data["summary"]["total_issues"] == 0
-        assert data["summary"]["completed_issues"] == 0
-        assert data["summary"]["open_issues"] == 0
-        assert data["summary"]["defect_discovery_rate_last_30_days"] == 0
-        assert data["summary"]["defect_closure_rate_last_30_days"] == 0
+        assert res["data"]["total_issues"] == 0
+        assert res["data"]["completed_issues"] == 0
+        assert res["data"]["open_issues"] == 0
+        assert res["data"]["defect_discovery_rate_last_30_days"] == 0
+        assert res["data"]["defect_closure_rate_last_30_days"] == 0
 
 
 def test_defect_service_github_failure(client):

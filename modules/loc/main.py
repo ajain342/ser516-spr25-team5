@@ -4,6 +4,7 @@ from modules.loc.online_Tool import fetch_loc_codetabs
 from modules.utilities.fetch_repo import fetch_repo
 from modules.utilities.cache import MetricCache
 from modules.loc.modified_LOC import run_cloc, compute_modified_loc
+from modules.utilities.response_wrapper import wrap_with_timestamp
 
 loc_cache = MetricCache()
 app = Flask(__name__)
@@ -67,7 +68,7 @@ def get_loc():
         else:
             return jsonify({"error": "Invalid method. Use 'online' or 'modified'"}), 400
 
-        return jsonify({"method": method, "result": result})
+        return jsonify(wrap_with_timestamp(result)), 200
 
     except Exception as e:
         return jsonify({

@@ -3,6 +3,7 @@ from modules.mttr.modified_MTTR import fetch_mttr_gitapi
 from modules.mttr.online_tool_MTTR import fetch_mttr_online
 from modules.utilities.fetch_repo import fetch_repo
 from modules.utilities.cache import MetricCache
+from modules.utilities.response_wrapper import wrap_with_timestamp
 
 cache = MetricCache()
 
@@ -45,11 +46,7 @@ def get_mttr():
         if result.get("error"):
             return jsonify({"error": result["error"], "repo_url": repo_url}), 400
         
-        return jsonify({
-            "repo_url": repo_url,
-            "result": round(result["mttr"], 2),
-            "method": method
-        })
+        return jsonify(wrap_with_timestamp(result)), 200
         
     except Exception as e:
         return jsonify({
