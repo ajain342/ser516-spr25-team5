@@ -1,8 +1,6 @@
-import os
 import shutil
 import json
 from pathlib import Path
-from modules.utilities.fetch_repo import fetch_repo
 
 def get_repo_size(repo_dir):
     total_size = sum(f.stat().st_size for f in Path(repo_dir).rglob('*') if not f.is_dir())
@@ -65,12 +63,7 @@ def check_ci_cd_files(repo_dir):
 
     return ci_cd_detected
 
-def compute_ici(repo_url):
-    repo_data = fetch_repo(repo_url)
-    if "error" in repo_data:
-        return repo_data
-
-    repo_dir = repo_data["repo_dir"]
+def compute_ici(repo_dir):
 
     repo_size = get_repo_size(repo_dir)
     file_types = count_files_by_extension(repo_dir)
@@ -87,7 +80,6 @@ def compute_ici(repo_url):
     shutil.rmtree(repo_dir)
 
     return {
-        "repo_url": repo_url,
         "repo_size_mb": repo_size,
         "file_types": file_types,
         "dependencies": dependencies,
