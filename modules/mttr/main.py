@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from modules.mttr.modified_MTTR import fetch_mttr_gitapi
-from modules.mttr.online_tool_MTTR import fetch_mttr_online
+# from modules.mttr.online_tool_MTTR import fetch_mttr_online
 from modules.utilities.fetch_repo import fetch_repo
 from modules.utilities.cache import MetricCache
 from modules.utilities.response_wrapper import wrap_with_timestamp
@@ -21,27 +21,27 @@ def get_mttr():
         return jsonify({"error": "Missing repo_url in request"}), 400
     
     repo_url = data['repo_url']
-    method = data.get('method') 
+    # method = data.get('method') 
     try:
-        if method == 'modified':
-            fetch_result = fetch_repo(repo_url)
-            if isinstance(fetch_result, dict) and "error" in fetch_result:
-                return jsonify({"error": fetch_result["error"]}), 400
+        # if method == 'modified':
+        fetch_result = fetch_repo(repo_url)
+        if isinstance(fetch_result, dict) and "error" in fetch_result:
+            return jsonify({"error": fetch_result["error"]}), 400
 
-            head_sha, _ = fetch_result
-            cache_key = f"{repo_url}|{head_sha}"
+        head_sha, _ = fetch_result
+        cache_key = f"{repo_url}|{head_sha}"
 
-            if cache.contains(cache_key):
-                result = cache.get(cache_key)
-            else:
-                result = fetch_mttr_gitapi(repo_url)
-                cache.add(cache_key, result)
-
-        elif method == 'online':
-            result = fetch_mttr_online(repo_url)
-        
+        if cache.contains(cache_key):
+            result = cache.get(cache_key)
         else:
-            return jsonify({"error": "Invalid method. Use 'online' or 'modified'"}), 400
+            result = fetch_mttr_gitapi(repo_url)
+            cache.add(cache_key, result)
+
+        # elif method == 'online':
+        #     result = fetch_mttr_online(repo_url)
+        
+        # else:
+        #     return jsonify({"error": "Invalid method. Use 'online' or 'modified'"}), 400
         
         if result.get("error"):
             return jsonify({"error": result["error"], "repo_url": repo_url}), 400
@@ -51,7 +51,7 @@ def get_mttr():
     except Exception as e:
         return jsonify({
             "error": f"Server error: {str(e)}",
-            "method": method,
+            # "method": method,
             "repo_url": repo_url
         }), 500
 
