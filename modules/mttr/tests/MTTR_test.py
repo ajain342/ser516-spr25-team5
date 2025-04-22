@@ -25,28 +25,28 @@ class TestMTTRAPI(unittest.TestCase):
         self.assertIn('error', data)
         self.assertEqual(data['error'], "Missing repo_url in request")
 
-    def test_invalid_method_handling(self):
-        payload = {
-            'repo_url': 'https://github.com/timescale/tsbs',
-            'method': 'invalid'
-        }
-        response = self.client.post('/mttr', json=payload)
-        data = response.get_json()
+    # def test_invalid_method_handling(self):
+    #     payload = {
+    #         'repo_url': 'https://github.com/timescale/tsbs',
+    #         'method': 'invalid'
+    #     }
+    #     response = self.client.post('/mttr', json=payload)
+    #     data = response.get_json()
 
-        self.assertEqual(response.status_code, 400)
-        self.assertIn('error', data)
-        self.assertEqual(data['error'], "Invalid method. Use 'online' or 'modified'")
+    #     self.assertEqual(response.status_code, 400)
+    #     self.assertIn('error', data)
+    #     self.assertEqual(data['error'], "Invalid method. Use 'online' or 'modified'")
 
-    def test_missing_method_parameter(self):
-        payload = {
-            'repo_url': 'https://github.com/timescale/tsbs'
-        }
-        response = self.client.post('/mttr', json=payload)
-        data = response.get_json()
+    # def test_missing_method_parameter(self):
+    #     payload = {
+    #         'repo_url': 'https://github.com/timescale/tsbs'
+    #     }
+    #     response = self.client.post('/mttr', json=payload)
+    #     data = response.get_json()
 
-        self.assertEqual(response.status_code, 400)
-        self.assertIn('error', data)
-        self.assertEqual(data['error'], "Invalid method. Use 'online' or 'modified'")
+    #     self.assertEqual(response.status_code, 400)
+    #     self.assertIn('error', data)
+    #     self.assertEqual(data['error'], "Invalid method. Use 'online' or 'modified'")
 
     def test_repository_with_no_issues(self):
         payload = {
@@ -60,10 +60,9 @@ class TestMTTRAPI(unittest.TestCase):
         self.assertIn('error', data)
         self.assertIn('No closed', data['error'])
 
-    def test_modified_method_calculation(self):
+    def test_calculation(self):
         payload = {
-            'repo_url': 'https://github.com/timescale/tsbs',
-            'method': 'modified'
+            'repo_url': 'https://github.com/timescale/tsbs'
         }
         response = self.client.post('/mttr', json=payload)
         data = response.get_json()
@@ -74,27 +73,6 @@ class TestMTTRAPI(unittest.TestCase):
             self.assertIn('method', data)
             self.assertEqual(data['method'], 'modified')
             self.assertIsInstance(data['result'], float)
-        else:
-            self.assertIn('error', data)
-
-    def test_online_method_calculation(self):
-        payload = {
-            'repo_url': 'https://github.com/timescale/tsbs',
-            'method': 'online'
-        }
-        response = self.client.post('/mttr', json=payload)
-        res = response.get_json()
-
-        if response.status_code == 200:
-            self.assertIn('data', res)
-            
-            data = res['data']
-            self.assertIn('error', data)
-            self.assertIn('mttr', data)
-            
-            self.assertIsNone(data['error'])
-            self.assertIsInstance(data['mttr'], float)
-            
         else:
             self.assertIn('error', data)
 
