@@ -77,8 +77,6 @@ def compute_ici(repo_dir):
         sum(ci_cd_usage.values()) * 5
     )
 
-    shutil.rmtree(repo_dir)
-
     return {
         "repo_size_mb": repo_size,
         "file_types": file_types,
