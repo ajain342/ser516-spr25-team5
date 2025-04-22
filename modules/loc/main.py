@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from urllib.parse import urlparse
-from modules.loc.online_Tool import fetch_loc_codetabs
+# from modules.loc.online_Tool import fetch_loc_codetabs
 from modules.utilities.fetch_repo import fetch_repo
 from modules.utilities.cache import MetricCache
 from modules.loc.modified_LOC import run_cloc, compute_modified_loc
@@ -37,36 +37,36 @@ def get_loc():
         return jsonify({"error": "Invalid GitHub repository URL"}), 400
 
     try:
-        if method == 'modified':
-            fetch_result = fetch_repo(repo_url)
-            if isinstance(fetch_result, dict) and "error" in fetch_result:
-                return jsonify({"error": fetch_result["error"]}), 400
+        # if method == 'modified':
+        fetch_result = fetch_repo(repo_url)
+        if isinstance(fetch_result, dict) and "error" in fetch_result:
+            return jsonify({"error": fetch_result["error"]}), 400
 
-            head_sha, cloned_path = fetch_result
-            cache_key = f"{repo_url}|{head_sha}"
+        head_sha, cloned_path = fetch_result
+        cache_key = f"{repo_url}|{head_sha}"
 
-            if loc_cache.contains(cache_key):
-                result = loc_cache.get(cache_key)
-            else:
-                cloc_json = run_cloc(cloned_path)
-                result = compute_modified_loc(cloc_json)
-                loc_cache.add(cache_key, result)
-
-        elif method == 'online':
-            fetch_result = fetch_repo(repo_url)
-            if isinstance(fetch_result, dict) and "error" in fetch_result:
-                return jsonify({"error": fetch_result["error"]}), 400
-
-            head_sha, _ = fetch_result
-            cache_key = f"{repo_url}|{head_sha}|online"
-
-            if loc_cache.contains(cache_key):
-                result = loc_cache.get(cache_key)
-            else:
-                result = fetch_loc_codetabs(repo_path).get("total_lines", 0)
-                loc_cache.add(cache_key, result)
+        if loc_cache.contains(cache_key):
+            result = loc_cache.get(cache_key)
         else:
-            return jsonify({"error": "Invalid method. Use 'online' or 'modified'"}), 400
+            cloc_json = run_cloc(cloned_path)
+            result = compute_modified_loc(cloc_json)
+            loc_cache.add(cache_key, result)
+
+        # elif method == 'online':
+        #     fetch_result = fetch_repo(repo_url)
+        #     if isinstance(fetch_result, dict) and "error" in fetch_result:
+        #         return jsonify({"error": fetch_result["error"]}), 400
+
+        #     head_sha, _ = fetch_result
+        #     cache_key = f"{repo_url}|{head_sha}|online"
+
+        #     if loc_cache.contains(cache_key):
+        #         result = loc_cache.get(cache_key)
+        #     else:
+        #         result = fetch_loc_codetabs(repo_path).get("total_lines", 0)
+        #         loc_cache.add(cache_key, result)
+        # else:
+        #     return jsonify({"error": "Invalid method. Use 'online' or 'modified'"}), 400
 
         return jsonify(wrap_with_timestamp(result)), 200
 
@@ -79,3 +79,4 @@ def get_loc():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5002)
+```
