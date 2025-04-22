@@ -8,7 +8,7 @@ Flask==3.0.0
 gitdb==4.0.12
 GitPython==3.1.44
 itsdangerous==2.2.0
-Jinja2==3.1.5
+Jinja2==3.1.6
 MarkupSafe==3.0.2
 smmap==5.0.2
 Werkzeug==3.1.3
