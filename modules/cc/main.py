@@ -58,7 +58,7 @@ def code_churn():
 
         fetch_res= fetch_repo(repo_url)
         if isinstance(fetch_res, dict) and "error" in fetch_res:
-            return jsonify({"error": fetch_res["error"]}), 400
+            return jsonify({"error": fetch_res["error"]}), 200
         
         head_sha, repo_path = fetch_res
 
