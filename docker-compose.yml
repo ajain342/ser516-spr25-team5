@@ -96,7 +96,7 @@ services:
       context: .
       dockerfile: DockerfileMiddleware
     ports:
-      - "5000:5000"
+      - "${GATEWAY_PORT}:5000"
     environment:
       - CC_PORT=${CC_PORT}
       - LOC_PORT=${LOC_PORT}
