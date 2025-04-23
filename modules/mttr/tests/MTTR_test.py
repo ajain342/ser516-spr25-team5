@@ -33,8 +33,7 @@ class TestMTTRAPI(unittest.TestCase):
             "error": "No closed issues found"
         }
         payload = {
-            "repo_url": "https://github.com/Siddharthbadal/Python-Projects",
-            "method": "modified"
+            "repo_url": "https://github.com/Siddharthbadal/Python-Projects"
         }
         response = self.client.post('/mttr', json=payload)
         data = response.get_json()
@@ -44,8 +43,7 @@ class TestMTTRAPI(unittest.TestCase):
 
     def test_calculation(self):
         payload = {
-            "repo_url": "https://github.com/timescale/tsbs",
-            "method": "modified"
+            "repo_url": "https://github.com/timescale/tsbs"
         }
         response = self.client.post('/mttr', json=payload)
         data = response.get_json()
