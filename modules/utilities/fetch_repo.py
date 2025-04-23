@@ -33,4 +33,4 @@ def fetch_repo(repo_url):
         head_sha = repo.head.commit.hexsha
         return head_sha, str(repo_dir)
     except Exception as e:
-        print(f"Error accessing repository: {e}")
+        return {"error": f"Error accessing repository: {str(e)}"}
