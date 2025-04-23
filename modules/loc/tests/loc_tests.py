@@ -29,19 +29,19 @@ class TestLOCAPI(unittest.TestCase):
         self.assertIn('error', data)
         self.assertEqual(data['error'], "Missing repo_url in request")
 
-    def test_invalid_method_handling(self):
-        """Test invalid calculation method handling"""
-        payload = {
-            'repo_url': 'https://github.com/timescale/tsbs',
-            'method': 'invalid'
-        }
-        response = self.client.post('/loc', json=payload)
-        print(f"\n[POST /loc] Invalid method: {response.get_data(as_text=True)}")
+    # def test_invalid_method_handling(self):
+    #     """Test invalid calculation method handling"""
+    #     payload = {
+    #         'repo_url': 'https://github.com/timescale/tsbs',
+    #         'method': 'invalid'
+    #     }
+    #     response = self.client.post('/loc', json=payload)
+    #     print(f"\n[POST /loc] Invalid method: {response.get_data(as_text=True)}")
         
-        self.assertEqual(response.status_code, 400)
-        data = response.get_json()
-        self.assertIn('error', data)
-        self.assertEqual(data['error'], "Invalid method. Use 'online' or 'modified'")
+    #     self.assertEqual(response.status_code, 400)
+    #     data = response.get_json()
+    #     self.assertIn('error', data)
+    #     self.assertEqual(data['error'], "Invalid method. Use 'online' or 'modified'")
 
 if __name__ == '__main__':
     unittest.main(argv=[''], exit=False)

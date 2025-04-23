@@ -17,32 +17,32 @@ MICROSERVICES = {
     'code-churn': {
         'url': 'http://cc_api:5001/code-churn',
         'method': 'POST',
-        'params': ['repo_url', 'method', 'num_commits_before_latest']
+        'params': ['repo_url', 'num_commits_before_latest']
     },
     'loc': {
         'url': 'http://loc_api:5002/loc',
         'method': 'POST',
-        'params': ['repo_url', 'method']  
+        'params': ['repo_url']  
     },
     'mttr': {
         'url': 'http://mttr_api:5003/mttr',
         'method': 'POST',
-        'params': ['repo_url', 'method']
+        'params': ['repo_url']
     },
     'cc': {
         'url': 'http://CYCLO_api:5005/cc',
         'method': 'POST',
-        'params': ['repo_url', 'method']
+        'params': ['repo_url']
     },
     'hm': {
         'url': 'http://HAL_api:5006/hm',
         'method': 'POST',
-        'params': ['repo_url', 'method']
+        'params': ['repo_url']
     },
     'dt': {
         'url': 'http://defects-over-time:5004/dt',
         'method': 'POST',
-        'params': ['repo_url', 'method']
+        'params': ['repo_url']
     }
 }
 
@@ -70,7 +70,7 @@ def analyze_repo():
         payload = {param: data.get(param) for param in service['params']}
         payload['repo_url'] = data['repo_url']  
         response = requests.request(
-            method=service['method'],
+            # method=service['method'],
             url=service['url'],
             json=payload,
             timeout=30 
