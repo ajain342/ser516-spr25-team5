@@ -30,7 +30,7 @@ def info():
     )
 
 
-@bp.route("/dt", methods=["POST"])
+@bp.route("/defects", methods=["POST"])
 def defects():
     defect_request = request.json
     if not defect_request:

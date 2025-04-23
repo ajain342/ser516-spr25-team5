@@ -14,7 +14,7 @@ class TestCodeChurnAPI(unittest.TestCase):
             "repo_url": "https://github.com/kgary/ser421public",
             "num_commits_before_latest": 10
 }
-        response = self.client.post('/code-churn', json=payload)
+        response = self.client.post('/cc', json=payload)
         self.assertEqual(response.status_code, 200)
         
         data = response.get_json()

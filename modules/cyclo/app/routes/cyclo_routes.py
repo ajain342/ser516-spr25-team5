@@ -30,7 +30,7 @@ def info():
         }
     }), 200
 
-@bp.route("/cc", methods=["POST"])
+@bp.route("/cyclo", methods=["POST"])
 def analyze_cc():
     data = request.get_json()
     repo_url = data.get("repo_url")

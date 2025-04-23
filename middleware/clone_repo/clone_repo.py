@@ -7,7 +7,7 @@ import git
 
 SHARED_BASE_DIR = "/shared/repos"
 
-def fetch_repo(repo_url):
+def clone_repo(repo_url):
     if not repo_url:
         raise ValueError("No repository URL provided. Please enter a valid GitHub repository URL.")
 

@@ -39,7 +39,7 @@ def compute_code_churn(repo, start_commit, end_commit):
 
     return added_lines, deleted_lines, modified_lines
 
-@app.route('/code-churn', methods=['POST'])
+@app.route('/cc', methods=['POST'])
 def code_churn():
     data = request.get_json()
     repo_url = data.get("repo_url")
