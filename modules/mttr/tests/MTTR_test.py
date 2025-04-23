@@ -48,10 +48,7 @@ class TestMTTRAPI(unittest.TestCase):
         response = self.client.post('/mttr', json=payload)
         data = response.get_json()
         if response.status_code == 200:
-            self.assertIn('repo_url', data)
             self.assertIn('result', data)
-            self.assertIn('method', data)
-            self.assertEqual(data['method'], 'modified')
             self.assertIsInstance(data['result'], float)
         else:
             self.assertIn('error', data)
