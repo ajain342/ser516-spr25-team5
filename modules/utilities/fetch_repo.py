@@ -24,40 +24,13 @@ def fetch_repo(repo_url):
 
     owner, repo = repo_path.split("/")
     repo_dir = Path(SHARED_BASE_DIR) / owner / repo
-    repo_dir.parent.mkdir(parents=True, exist_ok=True)
-
-    lockfile = repo_dir.with_suffix(".lock")
-    with open(lockfile, "w") as lock:
-        fcntl.flock(lock, fcntl.LOCK_EX)
-
-        try:
-            if repo_dir.exists():
-                git_dir = repo_dir / ".git"
-                if git_dir.exists():
-                    subprocess.run(
-                        ["git", "-C", str(repo_dir), "pull"],
-                        capture_output=True,
-                        text=True,
-                        check=True
-                    )
-                else:
-                    subprocess.run(["rm", "-rf", str(repo_dir)], check=True)
-                    subprocess.run(["git", "clone", repo_url, str(repo_dir)], check=True)
-            else:
-                subprocess.run(["git", "clone", repo_url, str(repo_dir)], check=True)
-
-            repo = git.Repo(str(repo_dir))
-            head_sha = repo.head.commit.hexsha
-
-        except subprocess.CalledProcessError as e:
-            error_output = e.stderr.lower() if e.stderr else ""
-            if "not found" in error_output:
-                raise RuntimeError("Repository not found. Please check the URL.")
-            elif "authentication" in error_output or "permission denied" in error_output:
-                raise PermissionError("Private repository or insufficient permissions. Please check your access.")
-            else:
-                raise RuntimeError(f"Git error: {e.stderr or e.stdout}")
-        except Exception as e:
-            raise RuntimeError(f"Unexpected error: {str(e)}")
-
-    return head_sha, str(repo_dir)
+    
+    if not repo_dir.exists():
+        return {"error": "Clone the repo first."}
+    
+    try:
+        repo = git.Repo(repo_dir)
+        head_sha = repo.head.commit.hexsha
+        return head_sha, str(repo_dir)
+    except Exception as e:
+        print(f"Error accessing repository: {e}")
