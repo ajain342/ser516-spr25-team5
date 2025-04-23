@@ -46,6 +46,25 @@ jobs:
           cd modules/loc
           pip install -r requirements.txt
           python tests/loc_tests.py
+  
+  test-ici-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install dependencies and run tests
+        run: |
+          cd modules/ici
+          pip install -r requirements.txt
+          python tests/ici_tests.py
+
 
   test-mttr-api:
     runs-on: ubuntu-latest

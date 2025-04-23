@@ -77,6 +77,19 @@ services:
       - analysis-network
     volumes:
       - shared-repos:/shared/repos
+  
+  ici_api: 
+    build: 
+      context: .
+      dockerfile: DockerfileServices
+      args:
+        SERVICE_NAME: ici
+    ports:
+      - "${ICI_PORT}:5009"
+    networks:
+      - analysis-network
+    volumes:
+      - shared-repos:/shared/repos
 
   clone_repo:
     build:
