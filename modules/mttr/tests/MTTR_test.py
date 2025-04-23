@@ -49,8 +49,9 @@ class TestMTTRAPI(unittest.TestCase):
         data = response.get_json()
         if response.status_code == 200:
             self.assertIn('data', data)
-            self.assertIn(data['mttr'])
-            self.assertIn(data['error'])
+            self.assertIn('mttr', data['data'])
+            self.assertIn('error', data['data'])
+            self.assertIn('timestamp', data)
         else:
             self.assertIn('error', data)
 
