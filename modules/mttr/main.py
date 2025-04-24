@@ -24,18 +24,20 @@ def get_mttr():
     # method = data.get('method') 
     try:
         # if method == 'modified':
-        fetch_result = fetch_repo(repo_url)
-        if isinstance(fetch_result, dict) and "error" in fetch_result:
-            return jsonify({"error": fetch_result["error"]}), 400
+        # fetch_result = fetch_repo(repo_url)
+        # if isinstance(fetch_result, dict) and "error" in fetch_result:
+        #     return jsonify({"error": fetch_result["error"]}), 200
 
-        head_sha, _ = fetch_result
-        cache_key = f"{repo_url}|{head_sha}"
+        # head_sha, _ = fetch_result
+        # cache_key = f"{repo_url}|{head_sha}"
 
-        if cache.contains(cache_key):
-            result = cache.get(cache_key)
-        else:
-            result = fetch_mttr_gitapi(repo_url)
-            cache.add(cache_key, result)
+        # if cache.contains(cache_key):
+        #     result = cache.get(cache_key)
+        # else:
+        #     result = fetch_mttr_gitapi(repo_url)
+        #     cache.add(cache_key, result)
+
+        result = fetch_mttr_gitapi(repo_url)
 
         # elif method == 'online':
         #     result = fetch_mttr_online(repo_url)

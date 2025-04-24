@@ -41,7 +41,7 @@ services:
     networks:
       - analysis-network
 
-  defects-over-time:
+  defects_api:
     build:
       context: .
       dockerfile: DockerfileServices
@@ -91,21 +91,37 @@ services:
     volumes:
       - shared-repos:/shared/repos
 
-  controller:
+  clone_repo:
     build:
       context: .
-      dockerfile: DockerfileController
+      dockerfile: DockerfileMiddleware
     ports:
-      - "${CONTROLLER_PORT}:5000"
+      - "${GATEWAY_PORT}:5000"
     environment:
-      - DOCKER_ENV=true
-    volumes:
-      - ./UI_Dashboard:/app/UI_Dashboard
-      - ./src:/app
+      - CC_PORT=${CC_PORT}
+      - LOC_PORT=${LOC_PORT}
+      - MTTR_PORT=${MTTR_PORT}
+      - DEFECTS_PORT=${DEFECTS_PORT}
+      - CYCLO_PORT=${CYCLO_PORT}
+      - HAL_PORT=${HAL_PORT}
+      - ICI_PORT=${ICI_PORT}
+      - CC_NAME=${CC_NAME}
+      - LOC_NAME=${LOC_NAME}
+      - MTTR_NAME=${MTTR_NAME}
+      - DEFECTS_NAME=${DEFECTS_NAME}
+      - CYCLO_NAME=${CYCLO_NAME}
+      - HAL_NAME=${HAL_NAME}
+      - ICI_NAME=${ICI_NAME}
     depends_on:
       - loc_api
-      - mttr_api
       - cc_api
+      - cyclo_api
+      - hal_api
+      - ici_api
+      - mttr_api
+      - defects_api
+    volumes:
+      - shared-repos:/shared/repos
     networks:
       - analysis-network
 

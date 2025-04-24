@@ -39,7 +39,7 @@ def compute_code_churn(repo, start_commit, end_commit):
 
     return added_lines, deleted_lines, modified_lines
 
-@app.route('/code-churn', methods=['POST'])
+@app.route('/cc', methods=['POST'])
 def code_churn():
     data = request.get_json()
     repo_url = data.get("repo_url")
@@ -56,7 +56,11 @@ def code_churn():
         if not repo_url:
             return jsonify({"error": "Missing 'repo_url' in request data"}), 400
 
-        head_sha, repo_path = fetch_repo(repo_url)
+        fetch_res= fetch_repo(repo_url)
+        if isinstance(fetch_res, dict) and "error" in fetch_res:
+            return jsonify({"error": fetch_res["error"]}), 200
+        
+        head_sha, repo_path = fetch_res
 
         repo = git.Repo(repo_path)
         total_commits = get_commit_count(repo)

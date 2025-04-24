@@ -33,8 +33,7 @@ class TestMTTRAPI(unittest.TestCase):
             "error": "No closed issues found"
         }
         payload = {
-            "repo_url": "https://github.com/Siddharthbadal/Python-Projects",
-            "method": "modified"
+            "repo_url": "https://github.com/Siddharthbadal/Python-Projects"
         }
         response = self.client.post('/mttr', json=payload)
         data = response.get_json()
@@ -44,17 +43,15 @@ class TestMTTRAPI(unittest.TestCase):
 
     def test_calculation(self):
         payload = {
-            "repo_url": "https://github.com/timescale/tsbs",
-            "method": "modified"
+            "repo_url": "https://github.com/timescale/tsbs"
         }
         response = self.client.post('/mttr', json=payload)
         data = response.get_json()
         if response.status_code == 200:
-            self.assertIn('repo_url', data)
-            self.assertIn('result', data)
-            self.assertIn('method', data)
-            self.assertEqual(data['method'], 'modified')
-            self.assertIsInstance(data['result'], float)
+            self.assertIn('data', data)
+            self.assertIn('mttr', data['data'])
+            self.assertIn('error', data['data'])
+            self.assertIn('timestamp', data)
         else:
             self.assertIn('error', data)
 

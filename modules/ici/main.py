@@ -20,7 +20,7 @@ def get_ici():
         data = request.get_json()
         repo_url = data.get("repo_url")
         if not repo_url:
-            return jsonify({"error": "Missing 'repo_url'"}), 400
+            return jsonify({"error": "Missing 'repo_url'"}), 200
 
         fetch_result = fetch_repo(repo_url)
         if isinstance(fetch_result, dict) and "error" in fetch_result:

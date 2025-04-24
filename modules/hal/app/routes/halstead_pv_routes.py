@@ -46,7 +46,7 @@ def info():
 
 
 
-@bp.route("/hm", methods=["POST"])
+@bp.route("/hal", methods=["POST"])
 def calculate_halstead_metrics():
     try:
         data = request.get_json()
@@ -56,7 +56,7 @@ def calculate_halstead_metrics():
 
         fetch_result = fetch_repo(repo_url)
         if isinstance(fetch_result, dict) and "error" in fetch_result:
-            return jsonify({"error": fetch_result["error"]}), 400
+            return jsonify({"error": fetch_result["error"]}), 200
 
         head_sha, repo_dir = fetch_result
         cache_key = f"{repo_url}|{head_sha}"
