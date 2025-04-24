@@ -2,10 +2,7 @@ from flask import Flask, request, jsonify
 from modules.mttr.modified_MTTR import fetch_mttr_gitapi
 # from modules.mttr.online_tool_MTTR import fetch_mttr_online
 from modules.utilities.fetch_repo import fetch_repo
-from modules.utilities.cache import MetricCache
 from modules.utilities.response_wrapper import wrap_with_timestamp
-
-cache = MetricCache()
 
 app = Flask(__name__)
 
@@ -29,13 +26,8 @@ def get_mttr():
         #     return jsonify({"error": fetch_result["error"]}), 200
 
         # head_sha, _ = fetch_result
-        # cache_key = f"{repo_url}|{head_sha}"
 
-        # if cache.contains(cache_key):
-        #     result = cache.get(cache_key)
-        # else:
-        #     result = fetch_mttr_gitapi(repo_url)
-        #     cache.add(cache_key, result)
+        # result = fetch_mttr_gitapi(repo_url)
 
         result = fetch_mttr_gitapi(repo_url)
 

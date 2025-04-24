@@ -5,11 +5,9 @@ from flask import jsonify, Blueprint, request
 from app.services.cyclo_service import get_cc
 from modules.utilities.fetch_repo import fetch_repo
 from modules.utilities.read_java_files import read_files
-from modules.utilities.cache import MetricCache
 from modules.utilities.response_wrapper import wrap_with_timestamp
 
 bp = Blueprint("cyclo", __name__)
-cc_cache = MetricCache()
 
 @bp.route("/info", methods=["GET"])
 def info():
@@ -43,10 +41,6 @@ def analyze_cc():
             return jsonify({"error": fetch_result["error"]}), 200
 
         head_sha, repo_dir = fetch_result
-        cache_key = f"{repo_url}|{head_sha}"
-
-        if cc_cache.contains(cache_key):
-            return jsonify({"method": "modified", "results": cc_cache.get(cache_key)}), 200
 
         code = read_files(repo_dir)
         if not code:
@@ -56,7 +50,6 @@ def analyze_cc():
             code = "\n".join(code.values())
 
         results = get_cc(code)
-        cc_cache.add(cache_key, results)
 
         return jsonify(wrap_with_timestamp(results)), 200
 

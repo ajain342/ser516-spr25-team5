@@ -4,12 +4,10 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"
 from flask import Flask, request, jsonify
 # from modules.cc.baseline_app import get_git_code_churn
 from modules.utilities.fetch_repo import fetch_repo
-from modules.utilities.cache import MetricCache
 from modules.utilities.response_wrapper import wrap_with_timestamp
 import git
 
 app = Flask(__name__)
-cache = MetricCache()
 
 def get_commit_count(repo):
     return len(list(repo.iter_commits()))
@@ -74,22 +72,18 @@ def code_churn():
 
         start_commit = f"HEAD~{num_commits_before_latest}" if num_commits_before_latest > 0 else "HEAD~1"
         end_commit = "HEAD"
-        cache_key = f"{repo_url}|{head_sha}|{start_commit}|{end_commit}"
 
-        if cache.contains(cache_key):
-            result = cache.get(cache_key)
-        else:
-            added, deleted, modified = compute_code_churn(repo, start_commit, end_commit)
-            result = {
-                # "method": method,
-                "total_commits": total_commits,
-                "commit_range": f"{start_commit} to {end_commit}",
-                "added_lines": added,
-                "deleted_lines": deleted,
-                "modified_lines": modified,
-                "result": added + deleted + modified
-            }
-            cache.add(cache_key, result)
+       
+        added, deleted, modified = compute_code_churn(repo, start_commit, end_commit)
+        result = {
+            # "method": method,
+            "total_commits": total_commits,
+            "commit_range": f"{start_commit} to {end_commit}",
+            "added_lines": added,
+            "deleted_lines": deleted,
+            "modified_lines": modified,
+            "result": added + deleted + modified
+        }
 
         repo.close()
         return jsonify(wrap_with_timestamp(result))
