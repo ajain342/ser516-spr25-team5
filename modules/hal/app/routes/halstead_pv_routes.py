@@ -6,8 +6,6 @@ from app.services.halstead_pv_service import HalsteadMetrics
 from app.services.extractor import Extractor, ParsingException
 from modules.utilities.fetch_repo import fetch_repo
 from modules.utilities.read_java_files import read_files
-from modules.utilities.cache import MetricCache
-cache = MetricCache()
 from modules.utilities.response_wrapper import wrap_with_timestamp
 
 bp = Blueprint("halstead_pv", __name__)
@@ -59,10 +57,6 @@ def calculate_halstead_metrics():
             return jsonify({"error": fetch_result["error"]}), 200
 
         head_sha, repo_dir = fetch_result
-        cache_key = f"{repo_url}|{head_sha}"
-
-        if cache.contains(cache_key):
-            return jsonify({"cached": True, "file_metrics": cache.get(cache_key)}), 200
 
         code_files = read_files(repo_dir)
         if not code_files:
@@ -97,8 +91,6 @@ def calculate_halstead_metrics():
             {m["file_name"]: m["metrics"] for m in project_metrics}
         )
         project_metrics.append({"Summary": aggregated_metrics})
-
-        cache.add(cache_key, project_metrics)
         return jsonify(wrap_with_timestamp(project_metrics)), 200
 
     except Exception as e:
