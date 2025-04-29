@@ -79,7 +79,7 @@ services:
       context: .
       dockerfile: DockerfileMiddleware
     ports:
-      - "8080:5000"
+      - "${GATEWAY_PORT}:5000"
     environment:
       - SERVICES=cc,loc,mttr,defects-over-time,cyclo,hal,ici
     depends_on:
