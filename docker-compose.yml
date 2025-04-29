@@ -1,125 +1,95 @@
 services:
-  loc_api:
+  loc:
     build:
       context: .
       dockerfile: DockerfileServices
       args:
         SERVICE_NAME: loc
     volumes:
-      - ./src:/app/src
       - shared-repos:/shared/repos
-    ports:
-      - "${LOC_PORT}:5002"
     networks:
       - analysis-network
 
-  mttr_api:
+  mttr:
     build:
       context: .
       dockerfile: DockerfileServices
       args:
         SERVICE_NAME: mttr
     volumes:
-      - ./src:/app/src
       - shared-repos:/shared/repos
-    ports:
-      - "${MTTR_PORT}:5003"
     networks:
       - analysis-network
 
-  cc_api:
+  cc:
     build:
       context: .
       dockerfile: DockerfileServices
       args:
         SERVICE_NAME: cc
     volumes:
-      - ./src:/app/src
       - shared-repos:/shared/repos
-    ports:
-      - "${CC_PORT}:5001"
     networks:
       - analysis-network
 
-  defects_api:
+  defects-over-time:
     build:
       context: .
       dockerfile: DockerfileServices
       args:
         SERVICE_NAME: defects-over-time
-    ports:
-      - "${DEFECTS_PORT}:5004"
     networks:
       - analysis-network
 
-  cyclo_api:
+  cyclo:
     build:
       context: .
       dockerfile: DockerfileServices
       args:
         SERVICE_NAME: cyclo
-    ports:
-      - "${CYCLO_PORT}:5005"
     networks:
       - analysis-network
     volumes:
       - shared-repos:/shared/repos
 
-  hal_api: 
+  hal: 
     build: 
       context: .
       dockerfile: DockerfileServices
       args:
         SERVICE_NAME: hal
-    ports:
-      - "${HAL_PORT}:5006"
     networks:
       - analysis-network
     volumes:
       - shared-repos:/shared/repos
   
-  ici_api: 
+  ici: 
     build: 
       context: .
       dockerfile: DockerfileServices
       args:
         SERVICE_NAME: ici
-    ports:
-      - "${ICI_PORT}:5009"
     networks:
       - analysis-network
     volumes:
       - shared-repos:/shared/repos
 
-  clone_repo:
+  middleware:
     build:
       context: .
       dockerfile: DockerfileMiddleware
     ports:
-      - "${GATEWAY_PORT}:5000"
+      - "8080:5000"
     environment:
-      - CC_PORT=${CC_PORT}
-      - LOC_PORT=${LOC_PORT}
-      - MTTR_PORT=${MTTR_PORT}
-      - DEFECTS_PORT=${DEFECTS_PORT}
-      - CYCLO_PORT=${CYCLO_PORT}
-      - HAL_PORT=${HAL_PORT}
-      - ICI_PORT=${ICI_PORT}
-      - CC_NAME=${CC_NAME}
-      - LOC_NAME=${LOC_NAME}
-      - MTTR_NAME=${MTTR_NAME}
-      - DEFECTS_NAME=${DEFECTS_NAME}
-      - CYCLO_NAME=${CYCLO_NAME}
-      - HAL_NAME=${HAL_NAME}
-      - ICI_NAME=${ICI_NAME}
+      - SERVICES=cc,loc,mttr,defects-over-time,cyclo,hal,ici
     depends_on:
-      - loc_api
-      - cc_api
-      - cyclo_api
-      - hal_api
-      - ici_api
-      - mttr_api
-      - defects_api
+      - loc
+      - cc
+      - cyclo
+      - hal
+      - ici
+      - mttr
+      - defects-over-time
     volumes:
       - shared-repos:/shared/repos
     networks:

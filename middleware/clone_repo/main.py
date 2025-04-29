@@ -8,19 +8,23 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 app = Flask(__name__)
 
 def load_service_config():
-    services = config.services_list
+    services_raw = os.getenv("SERVICES")
+    if not services_raw:
+        raise Exception("SERVICES environment variable not set")
+    
     service_mapping = {}
+    services = services_raw.split(",")
     for service in services:
-        service_mapping[os.getenv(f"{service}_PORT")] = os.getenv(f"{service}_NAME")
+        service_mapping[service] = service.replace("/", "-")
     return service_mapping
 
-def fetch_metrics(name, port, payload):
+def fetch_metrics(service_name, payload):
     try:
-        url = f"{config.endpoint_prefix}{name}_api:{port}/{name}"
+        url = f"http://{service_name}:5000/{service_name}"
         response = requests.post(url, json=payload)
-        return name, response.json()
+        return service_name, response.json()
     except Exception as e:
-        return name, {"error": str(e)}
+        return service_name, {"error": str(e)}
 
 @app.route("/metrics", methods=["POST"])
 def get_metrics():
@@ -34,7 +38,7 @@ def get_metrics():
 
         results = {}
         with ThreadPoolExecutor(max_workers=len(services)) as executor:
-            futures = [executor.submit(fetch_metrics, name, port, payload) for port, name in services.items()]
+            futures = [executor.submit(fetch_metrics, service_name, payload) for service_name in services.values()]
             for future in as_completed(futures):
                 name, result = future.result()
                 results[name] = result
