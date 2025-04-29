@@ -32,4 +32,4 @@ def get_ici():
         return jsonify({"error": f"Server error: {str(e)}", "repo_url": repo_url}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5009)
+    app.run(host='0.0.0.0', port=5000)
