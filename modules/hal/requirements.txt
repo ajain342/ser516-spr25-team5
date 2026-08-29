@@ -2,7 +2,7 @@ pytest
 flask
 antlr4-python3-runtime
 blinker==1.9.0
-click==8.1.8
+click==8.5.0
 colorama==0.4.6
 Flask==3.0.0
 gitdb==4.0.12
